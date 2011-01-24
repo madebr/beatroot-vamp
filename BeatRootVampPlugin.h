@@ -20,6 +20,8 @@
 
 using std::string;
 
+class BeatRootProcessor;
+
 class BeatRootVampPlugin : public Vamp::Plugin
 {
 public:
