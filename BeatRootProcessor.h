@@ -16,6 +16,10 @@
 #ifndef _BEATROOT_PROCESSOR_H_
 #define _BEATROOT_PROCESSOR_H_
 
+#include <vector>
+
+using std::vector;
+
 class BeatRootProcessor
 {
 protected:
@@ -88,21 +92,21 @@ protected:
     int totalFrames;
 	
     /** Flag for enabling or disabling debugging output */
-    static bool debug = false;
+    static bool debug;
 	
     /** Flag for suppressing all standard output messages except results. */
-    static bool silent = true;
+    static bool silent;
 	
     /** RMS frame energy below this value results in the frame being
      *  set to zero, so that normalisation does not have undesired
      *  side-effects. */
-    static double silenceThreshold = 0.0004; //!!!??? energy of what? should not be static?
+    static double silenceThreshold; //!!!??? energy of what? should not be static?
 	
     /** For dynamic range compression, this value is added to the log
      *  magnitude in each frequency bin and any remaining negative
      *  values are then set to zero.
      */
-    static double rangeThreshold = 10; //!!! sim
+    static double rangeThreshold; //!!! sim
 	
     /** Determines method of normalisation. Values can be:<ul>
      *  <li>0: no normalisation</li>
@@ -110,17 +114,17 @@ protected:
      *  <li>2: normalisation by exponential average of frame energy</li>
      *  </ul>
      */
-    static int normaliseMode = 2;
+    static int normaliseMode;
 	
     /** Ratio between rate of sampling the signal energy (for the
      * amplitude envelope) and the hop size */
-    static int energyOversampleFactor = 2; //!!! not used?
+    static int energyOversampleFactor; //!!! not used?
 	
 public:
 
     /** Constructor: note that streams are not opened until the input
      *  file is set (see <code>setInputFile()</code>). */
-    AudioProcessor() {
+    BeatRootProcessor() {
         cbIndex = 0;
         frameRMS = 0;
         ltAverage = 0;
@@ -129,106 +133,11 @@ public:
         fftSize = 0;
         hopTime = 0.010;	// DEFAULT, overridden with -h
         fftTime = 0.04644;	// DEFAULT, overridden with -f
-        progressCallback = null;
-        stdIn = new BufferedReader(new InputStreamReader(System.in));
-        if (doOnsetPlot)
-            plot = new Plot();
     } // constructor
 
-	/** For debugging, outputs information about the AudioProcessor to
-	 *  standard error.
-	 */
-	public void print() {
-		System.err.println(this);
-	} // print()
-
-	/** For interactive pause - wait for user to hit Enter */
-	public String readLine() {
-		try { return stdIn.readLine(); } catch (Exception e) { return null; }
-	} // readLine()
-	
-	/** Gives some basic information about the audio being processed. */
-	public String toString() {
-		return "AudioProcessor\n" +
-				String.format("\tFile: %s (%3.1f kHz, %1d channels)\n",
-						audioFileName, sampleRate/1000, channels) +
-				String.format("\tHop / FFT sizes: %5.3f / %5.3f",
-						hopTime, hopTime * fftSize / hopSize);
-	} // toString()
-
-	/** Adds a link to the GUI component which shows the progress of matching.
-	 *  @param c the AudioProcessor representing the other performance 
-	 */
-	public void setProgressCallback(ProgressIndicator c) {
-		progressCallback = c;
-	} // setProgressCallback()
-
-	/** Sets up the streams and buffers for live audio input (CD quality).
-	 *  If any Exception is thrown within this method, it is caught, and any
-	 *  opened streams are closed, and <code>pcmInputStream</code> is set to
-	 *  <code>null</code>, indicating that the method did not complete
-	 *  successfully.
-	 */
-	public void setLiveInput() {
-		try {
-			channels = 2;
-			sampleRate = 44100;
-			AudioFormat desiredFormat = new AudioFormat(
-						AudioFormat.Encoding.PCM_SIGNED, sampleRate, 16,
-						channels, channels * 2, sampleRate, false);
-			TargetDataLine tdl = AudioSystem.getTargetDataLine(desiredFormat);
-			tdl.open(desiredFormat, liveInputBufferSize);
-			pcmInputStream = new AudioInputStream(tdl);
-			audioFormat = pcmInputStream.getFormat();
-			init();
-			tdl.start();
-		} catch (Exception e) {
-			e.printStackTrace();
-			closeStreams();	// make sure it exits in a consistent state
-		}
-	} // setLiveInput()
-
-	/** Sets up the streams and buffers for audio file input.
-	 *  If any Exception is thrown within this method, it is caught, and any
-	 *  opened streams are closed, and <code>pcmInputStream</code> is set to
-	 *  <code>null</code>, indicating that the method did not complete
-	 *  successfully.
-	 *  @param fileName The path name of the input audio file.
-	 */
-	public void setInputFile(String fileName) {
-		closeStreams();		// release previously allocated resources
-		audioFileName = fileName;
-		try {
-			if (audioFileName == null)
-				throw new Exception("No input file specified");
-			File audioFile = new File(audioFileName);
-			if (!audioFile.isFile())
-				throw new FileNotFoundException(
-							"Requested file does not exist: " + audioFileName);
-			rawInputStream = AudioSystem.getAudioInputStream(audioFile);
-			audioFormat = rawInputStream.getFormat();
-			channels = audioFormat.getChannels();
-			sampleRate = audioFormat.getSampleRate();
-			pcmInputStream = rawInputStream;
-			if ((audioFormat.getEncoding()!=AudioFormat.Encoding.PCM_SIGNED) ||
-					(audioFormat.getFrameSize() != channels * 2) ||
-					audioFormat.isBigEndian()) {
-				AudioFormat desiredFormat = new AudioFormat(
-						AudioFormat.Encoding.PCM_SIGNED, sampleRate, 16,
-						channels, channels * 2, sampleRate, false);
-				pcmInputStream = AudioSystem.getAudioInputStream(desiredFormat,
-																rawInputStream);
-				audioFormat = desiredFormat;
-			}
-			init();
-		} catch (Exception e) {
-			e.printStackTrace();
-			closeStreams();	// make sure it exits in a consistent state
-		}
-	} // setInputFile()
-
+protected:
 	/** Allocates memory for arrays, based on parameter settings */
-	protected void init() {
+	void init() {
 		hopSize = (int) Math.round(sampleRate * hopTime);
 		fftSize = (int) Math.round(Math.pow(2,
 				Math.round( Math.log(fftTime * sampleRate) / Math.log(2))));
@@ -263,11 +172,10 @@ public:
 		cbIndex = 0;
 		frameRMS = 0;
 		ltAverage = 0;
-		progressCallback = null;
 	} // init()
 
 	/** Closes the input stream(s) associated with this object. */
-	public void closeStreams() {
+	void closeStreams() {
 		if (pcmInputStream != null) {
 			try {
 				pcmInputStream.close();
@@ -290,7 +198,7 @@ public:
 	 *  is the energy is summed into the comparison bins. See also
 	 *  processFrame()
 	 */
-	protected void makeFreqMap(int fftSize, float sampleRate) {
+	void makeFreqMap(int fftSize, float sampleRate) {
 		freqMap = new int[fftSize/2+1];
 		double binWidth = sampleRate / fftSize;
 		int crossoverBin = (int)(2 / (Math.pow(2, 1/12.0) - 1));
@@ -312,7 +220,7 @@ public:
 	/** Calculates the weighted phase deviation onset detection function.
 	 *  Not used.
 	 *  TODO: Test the change to WPD fn */
-	protected void weightedPhaseDeviation() {
+	void weightedPhaseDeviation() {
 		if (frameCount < 2)
 			phaseDeviation[frameCount] = 0;
 		else {
@@ -337,7 +245,7 @@ public:
 	 *  is read. If a complete frame cannot be read, the InputStream is set
 	 *  to null.
 	 */
-	public boolean getFrame() {
+	bool getFrame() {
 		if (pcmInputStream == null)
 			return false;
 		try {
@@ -401,7 +309,7 @@ public:
 	 *  part-logarithmic array, then computing the spectral flux 
 	 *  then (optionally) normalising and calculating onsets.
 	 */
-	protected void processFrame() {
+	void processFrame() {
 		if (getFrame()) {
 			for (int i = 0; i < fftSize; i++) {
 				reBuffer[i] = window[i] * circBuffer[cbIndex];
@@ -479,7 +387,7 @@ public:
 	} // processFrame()
 
 	/** Processes a complete file of audio data. */
-	public void processFile() {
+	void processFile() {
 		while (pcmInputStream != null) {
 			// Profile.start(0);
 			processFrame();
@@ -552,7 +460,7 @@ public:
 	 *  @param fileName File containing the data
 	 *  @return An array containing the feature values
 	 */
-	public static double[] getFeatures(String fileName) {
+	static double[] getFeatures(String fileName) {
 		ArrayList<Double> l = new ArrayList<Double>();
 		try {
 			BufferedReader b = new BufferedReader(new FileReader(fileName));
@@ -606,7 +514,7 @@ public:
 	 * @param fileName The file of feature values
 	 * @param hopTime The spacing of feature values in time
 	 */
-	public void processFeatures(String fileName, double hopTime) {
+	void processFeatures(String fileName, double hopTime) {
 		double hop = hopTime;
 		double[] features = getFeatures(fileName);
 		Peaks.normalise(features);
@@ -627,7 +535,7 @@ public:
 	} // processFeatures()
 
 	/** Copies output of audio processing to the display panel. */
-	public void setDisplay(BeatTrackDisplay btd) {
+	void setDisplay(BeatTrackDisplay btd) {
 		int energy2[] = new int[totalFrames*energyOversampleFactor];
 		double time[] = new double[totalFrames*energyOversampleFactor];
 		for (int i = 0; i < totalFrames*energyOversampleFactor; i++) {

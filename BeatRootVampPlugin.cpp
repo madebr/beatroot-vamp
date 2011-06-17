@@ -14,6 +14,7 @@
 */
 
 #include "BeatRootVampPlugin.h"
+#include "BeatRootProcessor.h"
 
 
 BeatRootVampPlugin::BeatRootVampPlugin(float inputSampleRate) :
