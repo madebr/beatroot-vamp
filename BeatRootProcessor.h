@@ -16,6 +16,8 @@
 #ifndef _BEATROOT_PROCESSOR_H_
 #define _BEATROOT_PROCESSOR_H_
 
+#include "Peaks.h"
+
 #include <vector>
 #include <cmath>
 
@@ -53,7 +55,7 @@ protected:
     double ltAverage;
 
     /** Spectral flux onset detection function, indexed by frame. */
-    vector<int> spectralFlux;
+    vector<double> spectralFlux;
 	
     /** A mapping function for mapping FFT bins to final frequency bins.
      *  The mapping is linear (1-1) until the resolution reaches 2 points per
@@ -277,18 +279,19 @@ protected:
 //		double[] slope = new double[energy.length];
 //		double hop = hopTime / energyOversampleFactor;
 //		Peaks.getSlope(energy, hop, 15, slope);
-//		LinkedList<Integer> peaks = Peaks.findPeaks(slope, (int)lrint(0.06 / hop), 10);
+//		vector<Integer> peaks = Peaks.findPeaks(slope, (int)lrint(0.06 / hop), 10);
 		
         double hop = hopTime;
-        Peaks.normalise(spectralFlux);
-        LinkedList<Integer> peaks = Peaks.findPeaks(spectralFlux, (int)lrint(0.06 / hop), 0.35, 0.84, true);
+        Peaks::normalise(spectralFlux);
+        vector<int> peaks = Peaks::findPeaks(spectralFlux, (int)lrint(0.06 / hop), 0.35, 0.84, true);
         onsets = new double[peaks.size()];
         double[] y2 = new double[onsets.length];
-        Iterator<Integer> it = peaks.iterator();
+        vector<int>::iterator it = peaks.begin();
         onsetList = new EventList();
         double minSalience = Peaks.min(spectralFlux);
         for (int i = 0; i < onsets.length; i++) {
-            int index = it.next();
+            int index = *it;
+            ++it;
             onsets[i] = index * hop;
             y2[i] = spectralFlux[index];
             Event e = BeatTrackDisplay.newBeat(onsets[i], 0);
