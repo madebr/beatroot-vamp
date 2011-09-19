@@ -284,8 +284,8 @@ protected:
         double hop = hopTime;
         Peaks::normalise(spectralFlux);
         vector<int> peaks = Peaks::findPeaks(spectralFlux, (int)lrint(0.06 / hop), 0.35, 0.84, true);
-        onsets = new double[peaks.size()];
-        double[] y2 = new double[onsets.length];
+        onsets.clear();
+        onsets.resize(peaks.size(), 0);
         vector<int>::iterator it = peaks.begin();
         onsetList = new EventList();
         double minSalience = Peaks.min(spectralFlux);
@@ -293,7 +293,6 @@ protected:
             int index = *it;
             ++it;
             onsets[i] = index * hop;
-            y2[i] = spectralFlux[index];
             Event e = BeatTrackDisplay.newBeat(onsets[i], 0);
 //			if (debug)
 //				System.err.printf("Onset: %8.3f  %8.3f  %8.3f\n",
