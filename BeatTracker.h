@@ -18,6 +18,7 @@
 
 #include "Event.h"
 #include "Agent.h"
+#include "Induction.h"
 
 using std::vector;
 
@@ -70,12 +71,14 @@ public:
      *  @return The list of beats, or an empty list if beat tracking fails
      */
     static EventList beatTrack(EventList events, EventList beats) {
-	AgentList agents = null;
+	AgentList agents;
 	int count = 0;
 	double beatTime = -1;
 	if (!beats.empty()) {
 	    count = beats.size() - 1;
-	    beatTime = beats.l.getLast().keyDown;
+	    EventList::iterator itr = beats.end();
+	    --itr;
+	    beatTime = itr->time;
 	}
 	if (count > 0) { // tempo given by mean of initial beats
 	    double ioi = (beatTime - beats.l.getFirst().keyDown) / count;

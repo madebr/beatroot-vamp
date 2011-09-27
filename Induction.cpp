@@ -13,28 +13,10 @@
   COPYING included with this distribution for more information.
 */
 
-#ifndef _EVENT_H_
-#define _EVENT_H_
-
-#include <vector>
-
-struct Event {
-    double time;
-    double beat;
-    double salience;
-
-    Event() : time(0), beat(0), salience(0) { }
-    Event(double t, double b, double s) : time(t), beat(b), salience(s) { }
-
-    bool operator==(const Event &e) {
-	return (time == e.time && beat == e.beat && salience == e.salience);
-    }
-    bool operator!=(const Event &e) {
-	return !operator==(e);
-    }
-};
-
-typedef std::vector<Event> EventList;
-
-#endif
+double Induction::clusterWidth = 0.025;
+double Induction::minIOI = 0.070;
+double Induction::maxIOI = 2.500;
+double Induction::minIBI = 0.3; 
+double Induction::maxIBI = 1.0;
+int Induction::topN = 10;
 
