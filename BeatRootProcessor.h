@@ -17,6 +17,8 @@
 #define _BEATROOT_PROCESSOR_H_
 
 #include "Peaks.h"
+#include "Event.h"
+#include "BeatTracker.h"
 
 #include <vector>
 #include <cmath>
@@ -88,8 +90,7 @@ protected:
     vector<double> onsets;
 	
     /** The estimated onset times and their saliences. */	
-    //!!!EventList onsetList;
-    vector<double> onsetList; //!!! corresponding to keyDown member of events in list
+    EventList onsetList;
 
     /** Total number of audio frames if known, or -1 for live or compressed input. */
     int totalFrames;
@@ -287,20 +288,20 @@ protected:
         onsets.clear();
         onsets.resize(peaks.size(), 0);
         vector<int>::iterator it = peaks.begin();
-        onsetList = new EventList();
-        double minSalience = Peaks.min(spectralFlux);
-        for (int i = 0; i < onsets.length; i++) {
+        onsetList.clear();
+        double minSalience = Peaks::min(spectralFlux);
+        for (int i = 0; i < onsets.size(); i++) {
             int index = *it;
             ++it;
             onsets[i] = index * hop;
-            Event e = BeatTrackDisplay.newBeat(onsets[i], 0);
+            Event e = BeatTracker::newBeat(onsets[i], 0);
 //			if (debug)
 //				System.err.printf("Onset: %8.3f  %8.3f  %8.3f\n",
 //						onsets[i], energy[index], slope[index]);
 //			e.salience = slope[index];	// or combination of energy + slope??
             // Note that salience must be non-negative or the beat tracking system fails!
             e.salience = spectralFlux[index] - minSalience;
-            onsetList.add(e);
+            onsetList.push_back(e);
         }
 
         //!!! This onsetList is then fed in to BeatTrackDisplay::beatTrack
