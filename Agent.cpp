@@ -32,21 +32,21 @@ double Agent::correctionFactor = 0.0;
 double Agent::expiryTime = 0.0;
 double Agent::decayFactor = 0.0;
 
-bool Agent::considerAsBeat(Event e, const AgentList &a) {
+bool Agent::considerAsBeat(Event e, AgentList &a) {
     double err;
     if (beatTime < 0) {	// first event
 	accept(e, 0, 1);
 	return true;
     } else {			// subsequent events
-	if (e.keyDown - events.l.getLast().keyDown > expiryTime) {
+	if (e.time - events.l.getLast().keyDown > expiryTime) {
 	    phaseScore = -1.0;	// flag agent to be deleted
 	    return false;
 	}
-	double beats = Math.round((e.keyDown - beatTime) / beatInterval);
-	err = e.keyDown - beatTime - beats * beatInterval;
+	double beats = nearbyint((e.time - beatTime) / beatInterval);
+	err = e.time - beatTime - beats * beatInterval;
 	if ((beats > 0) && (-preMargin <= err) && (err <= postMargin)) {
-	    if (Math.abs(err) > innerMargin)	// Create new agent that skips this
-		a.add(new Agent(this));	//  event (avoids large phase jump)
+	    if (fabs(err) > innerMargin)	// Create new agent that skips this
+		a.push_back(Agent(*this));	//  event (avoids large phase jump)
 	    accept(e, err, (int)beats);
 	    return true;
 	}

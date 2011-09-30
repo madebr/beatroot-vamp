@@ -128,7 +128,8 @@ public:
 
     /** Constructor: note that streams are not opened until the input
      *  file is set (see <code>setInputFile()</code>). */
-    BeatRootProcessor() {
+    BeatRootProcessor(float sr) :
+        sampleRate(sr) {
         frameRMS = 0;
         ltAverage = 0;
         frameCount = 0;

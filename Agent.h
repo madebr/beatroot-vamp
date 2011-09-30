@@ -18,6 +18,8 @@
 
 #include "Event.h"
 
+class AgentList;
+
 /** Agent is the central class for beat tracking.
  *  Each Agent object has a tempo hypothesis, a history of tracked beats, and
  *  a score evaluating the continuity, regularity and salience of its beat track.
@@ -25,9 +27,6 @@
 class Agent
 {
 public:
-
-    typedef std::vector<Agent> AgentList;
-
     /** The maximum amount by which a beat can be later than the predicted beat time,
      *  expressed as a fraction of the beat period. */
     static double POST_MARGIN_FACTOR;
@@ -165,6 +164,7 @@ protected:
 	return value;
     }
 
+public:
     /** Accept a new Event as a beat time, and update the state of the Agent accordingly.
      *  @param e The Event which is accepted as being on the beat.
      *  @param err The difference between the predicted and actual beat times.
@@ -198,7 +198,7 @@ protected:
      * @param a The list of all agents, which is updated if a new agent is created.
      * @return Indicate whether the given Event was accepted as a beat by this Agent.
      */
-    bool considerAsBeat(Event e, const AgentList &a);
+    bool considerAsBeat(Event e, AgentList &a);
 
     /** Interpolates missing beats in the Agent's beat track, starting from the beginning of the piece. */
     void fillBeats() {
@@ -210,8 +210,11 @@ protected:
      */
     void fillBeats(double start);
 
-}; // class Agent
+    // for sorting AgentList
+    bool operator<(const Agent &a) const {
+        return beatInterval < a.beatInterval;
+    }
 
-typedef Agent::AgentList AgentList;
+}; // class Agent
 
 #endif

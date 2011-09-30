@@ -30,6 +30,6 @@ BeatRootProcessor::rangeThreshold = 10;
 int
 BeatRootProcessor::normaliseMode = 2;
 
-int
-BeatRootProcessor::energyOversampleFactor = 2;
+//int
+//BeatRootProcessor::energyOversampleFactor = 2;
 

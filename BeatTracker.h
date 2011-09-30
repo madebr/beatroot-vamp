@@ -18,6 +18,7 @@
 
 #include "Event.h"
 #include "Agent.h"
+#include "AgentList.h"
 #include "Induction.h"
 
 using std::vector;
@@ -33,12 +34,6 @@ protected:
 	
     /** the times of onsets (in seconds) */
     vector<double> onsets;
-	
-    /** the times corresponding to each point in the <code>magnitudes</code> array */
-    vector<double> env;
-	
-    /** smoothed amplitude envelope of audio signal */ 
-    vector<int> magnitudes;
 
 public:
     /** Constructor:
@@ -81,23 +76,24 @@ public:
 	    beatTime = itr->time;
 	}
 	if (count > 0) { // tempo given by mean of initial beats
-	    double ioi = (beatTime - beats.l.getFirst().keyDown) / count;
-	    agents = new AgentList(new Agent(ioi), null);
-	} else									// tempo not given; use tempo induction
-	    agents = Induction.beatInduction(events);
-	if (beats != null)
-	    for (AgentList ptr = agents; ptr.ag != null; ptr = ptr.next) {
-		ptr.ag.beatTime = beatTime;
-		ptr.ag.beatCount = count;
-		ptr.ag.events = new EventList(beats);
+	    double ioi = (beatTime - beats.begin()->time) / count;
+	    agents.push_back(Agent(ioi));
+	} else // tempo not given; use tempo induction
+	    agents = Induction::beatInduction(events);
+	if (!beats.empty())
+	    for (AgentList::iterator itr = agents.begin(); itr != agents.end();
+                 ++itr) {
+		itr->beatTime = beatTime;
+		itr->beatCount = count;
+		itr->events = beats;
 	    }
 	agents.beatTrack(events, -1);
-	Agent best = agents.bestAgent();
-	if (best != null) {
-	    best.fillBeats(beatTime);
-	    return best.events;
+	Agent *best = agents.bestAgent();
+	if (best) {
+	    best->fillBeats(beatTime);
+	    return best->events;
 	}
-	return new EventList();
+	return EventList();
     } // beatTrack()/1
 	
     /** Finds the mean tempo (as inter-beat interval) from an array of beat times
@@ -105,9 +101,9 @@ public:
      *  @return The average inter-beat interval
      */
     static double getAverageIBI(vector<double> d) {
-	if ((d == null) || (d.length < 2))
+	if (d.size() < 2)
 	    return -1.0;
-	return (d[d.length - 1] - d[0]) / (d.length - 1);
+	return (d[d.size() - 1] - d[0]) / (d.size() - 1);
     } // getAverageIBI()
 	
     /** Finds the median tempo (as inter-beat interval) from an array of beat times
@@ -115,16 +111,17 @@ public:
      *  @return The median inter-beat interval
      */
     static double getMedianIBI(vector<double> d) {
-	if ((d == null) || (d.length < 2))
+	if (d.size() < 2)
 	    return -1.0;
-	vector<double> ibi = new double[d.length-1];
-	for (int i = 1; i < d.length; i++)
+	vector<double> ibi;
+        ibi.resize(d.size()-1);
+	for (int i = 1; i < d.size(); i++)
 	    ibi[i-1] = d[i] - d[i-1];
-	Arrays.sort(ibi);
-	if (ibi.length % 2 == 0)
-	    return (ibi[ibi.length / 2] + ibi[ibi.length / 2 - 1]) / 2;
+        std::sort(ibi.begin(), ibi.end());
+	if (ibi.size() % 2 == 0)
+	    return (ibi[ibi.size() / 2] + ibi[ibi.size() / 2 - 1]) / 2;
 	else
-	    return ibi[ibi.length / 2];
+	    return ibi[ibi.size() / 2];
     } // getAverageIBI()
 	
 	
@@ -140,16 +137,6 @@ public:
 	return onsets;
     } // getOnsets()
 
-    /** @return the array of offset times */
-    vector<double> getOffsets() {
-	return offsets;
-    } // getOffsets()
-
-    /** @return the array of MIDI pitches */
-    vector<int> getPitches() {
-	return pitches;
-    } // getPitches()
-
     /** Sets the onset times as a list of Events, for use by the beat tracking methods. 
      *  @param on The times of onsets in seconds
      */
@@ -164,43 +151,11 @@ public:
 	onsets = on;
     } // setOnsets()
 
-    /** Sets the array of offset times, for displaying MIDI input data.
-     *  @param off The array of MIDI offset times
-     */
-    void setOffsets(vector<double> off) {
-	offsets = off;
-	// setMode(SHOW_MIDI, SHOW_AUDIO | SHOW_SPECTRO);
-    } // setOffsets()
-
-    /** Sets the array of times of amplitude envelope points, for displaying.
-     *  @param envTimes The array of times in seconds corresponding to the values in <code>magnitudes</code>
-     */
-    void setEnvTimes(vector<double> envTimes) {
-	env = envTimes;
-	setMode(SHOW_AUDIO, SHOW_MIDI);
-    } // setEnvTimes()
-
-    /** Sets the array of magnitude values, for displaying.
-     *  @param mag The array of amplitude envelope values
-     */
-    void setMagnitudes(vector<int> mag) {
-	magnitudes = mag;
-    } // setMagnitudes()
-
-    /** Sets the array of pitch values, for displaying MIDI input data.
-     *  @param p The array of MIDI pitch values
-     */
-    void setPitches(vector<int> p) {
-	pitches = p;
-    } // setPitches()
-
     /** Sets the list of beats.
      * @param b The list of beats
      */
     void setBeats(EventList b) {
 	beats = b;
-	selectedBeat = null;
-	beatPtr = beats.listIterator();
     } // setBeats()
 
 }; // class BeatTrackDisplay
