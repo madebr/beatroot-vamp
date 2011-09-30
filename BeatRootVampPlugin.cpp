@@ -16,6 +16,7 @@
 #include "BeatRootVampPlugin.h"
 #include "BeatRootProcessor.h"
 
+#include <vamp-sdk/PluginAdapter.h>
 
 BeatRootVampPlugin::BeatRootVampPlugin(float inputSampleRate) :
     Plugin(inputSampleRate)
@@ -182,7 +183,7 @@ BeatRootVampPlugin::initialise(size_t channels, size_t stepSize, size_t blockSiz
 	return false;
     }
 
-    m_processor->initialise();
+    m_processor->reset();
 
     return true;
 }

@@ -27,6 +27,10 @@ using std::vector;
 
 class BeatRootProcessor
 {
+public:
+    int getFFTSize() const { return fftSize; }
+    int getHopSize() const { return hopSize; }
+
 protected:
     /** Sample rate of audio */
     float sampleRate;
@@ -91,12 +95,6 @@ protected:
 	
     /** The estimated onset times and their saliences. */	
     EventList onsetList;
-
-    /** Total number of audio frames if known, or -1 for live or compressed input. */
-    int totalFrames;
-	
-    /** Flag for enabling or disabling debugging output */
-    static bool debug;
 	
     /** Flag for suppressing all standard output messages except results. */
     static bool silent;
@@ -135,16 +133,19 @@ public:
         frameCount = 0;
         hopSize = 0;
         fftSize = 0;
-        hopTime = 0.010;	// DEFAULT, overridden with -h
-        fftTime = 0.04644;	// DEFAULT, overridden with -f
-        totalFrames = -1; //!!! not needed?
+        hopTime = 0.010;
+        fftTime = 0.04644;
+        hopSize = lrint(sampleRate * hopTime);
+        fftSize = lrint(pow(2, lrint( log(fftTime * sampleRate) / log(2))));
     } // constructor
+
+    void reset() {
+        init();
+    }
 
 protected:
     /** Allocates memory for arrays, based on parameter settings */
     void init() {
-        hopSize = lrint(sampleRate * hopTime);
-        fftSize = lrint(pow(2, lrint( log(fftTime * sampleRate) / log(2))));
         makeFreqMap(fftSize, sampleRate);
         prevFrame.clear();
         for (int i = 0; i < freqMapSize; i++) prevFrame.push_back(0);
@@ -168,7 +169,7 @@ protected:
         int crossoverMidi = (int)lrint(log(crossoverBin*binWidth/440)/
                                        log(2) * 12 + 69);
         int i = 0;
-        while (i <= crossoverBin)
+        while (i <= crossoverBin && i <= fftSize/2)
             freqMap[i++] = i;
         while (i <= fftSize/2) {
             double midi = log(i*binWidth/440) / log(2) * 12 + 69;
@@ -179,10 +180,10 @@ protected:
         freqMapSize = freqMap[i-1] + 1;
     } // makeFreqMap()
 
-    /** Processes a frame of audio data by first computing the STFT with a
-     *  Hamming window, then mapping the frequency bins into a part-linear
-     *  part-logarithmic array, then computing the spectral flux 
-     *  then (optionally) normalising and calculating onsets.
+    /** Processes a frame of frequency-domain audio data by mapping
+     *  the frequency bins into a part-linear part-logarithmic array,
+     *  then computing the spectral flux then (optionally) normalising
+     *  and calculating onsets.
      */
     void processFrame(const float *const *inputBuffers) {
         newFrame.clear();

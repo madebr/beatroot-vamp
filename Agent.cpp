@@ -27,7 +27,6 @@ const double Agent::DEFAULT_EXPIRY_TIME = 10.0;
 int Agent::idCounter = 0;
 
 double Agent::innerMargin = 0.0;
-double Agent::outerMargin = 0.0;
 double Agent::correctionFactor = 0.0;
 double Agent::expiryTime = 0.0;
 double Agent::decayFactor = 0.0;
@@ -38,7 +37,9 @@ bool Agent::considerAsBeat(Event e, AgentList &a) {
 	accept(e, 0, 1);
 	return true;
     } else {			// subsequent events
-	if (e.time - events.l.getLast().keyDown > expiryTime) {
+        EventList::iterator last = events.end();
+        --last;
+	if (e.time - last->time > expiryTime) {
 	    phaseScore = -1.0;	// flag agent to be deleted
 	    return false;
 	}
@@ -46,7 +47,7 @@ bool Agent::considerAsBeat(Event e, AgentList &a) {
 	err = e.time - beatTime - beats * beatInterval;
 	if ((beats > 0) && (-preMargin <= err) && (err <= postMargin)) {
 	    if (fabs(err) > innerMargin)	// Create new agent that skips this
-		a.push_back(Agent(*this));	//  event (avoids large phase jump)
+		a.add(Agent(*this));	//  event (avoids large phase jump)
 	    accept(e, err, (int)beats);
 	    return true;
 	}
@@ -55,24 +56,24 @@ bool Agent::considerAsBeat(Event e, AgentList &a) {
 } // considerAsBeat()
 
 
-void fillBeats(double start) {
+void Agent::fillBeats(double start) {
     double prevBeat = 0, nextBeat, currentInterval, beats;
-    EventList::iterator list = events.begin();
-    if (list != events.end()) {
-	++list;
-	prevBeat = list->time;
-	--list;
+    EventList::iterator ei = events.begin();
+    if (ei != events.end()) {
+	++ei;
+	prevBeat = ei->time;
+	--ei;
     }
-    for ( ; list != events.end(); ++list) {
-	++list;
-	nextBeat = list->time;
-	--list;
+    for ( ; ei != events.end(); ++ei) {
+	++ei;
+	nextBeat = ei->time;
+	--ei; // so as to insert before nextBeat
 	beats = nearbyint((nextBeat - prevBeat) / beatInterval - 0.01); //prefer slow
 	currentInterval = (nextBeat - prevBeat) / beats;
 	for ( ; (nextBeat > start) && (beats > 1.5); beats--) {
 	    prevBeat += currentInterval;
-	    //!!! need to insert this event after current itr
-	    list.add(BeatTracker::newBeat(prevBeat, 0));	// more than once OK??
+            events.insert(ei, BeatTracker::newBeat(prevBeat, 0));
+            ++ei;
 	}
 	prevBeat = nextBeat;
     }

@@ -16,9 +16,6 @@
 #include "BeatRootProcessor.h"
 
 bool
-BeatRootProcessor::debug = false;
-
-bool
 BeatRootProcessor::silent = true;
 
 double

@@ -15,6 +15,6 @@
 
 #include "Peaks.h"
 
-static int Peaks::pre = 3;
-static int Peaks::post = 1;
+int Peaks::pre = 3;
+int Peaks::post = 1;
 

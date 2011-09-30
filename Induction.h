@@ -17,6 +17,7 @@
 #define _INDUCTION_H_
 
 #include "Agent.h"
+#include "AgentList.h"
 #include "Event.h"
 
 #include <vector>

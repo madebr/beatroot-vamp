@@ -13,6 +13,8 @@
   COPYING included with this distribution for more information.
 */
 
+#include "Induction.h"
+
 double Induction::clusterWidth = 0.025;
 double Induction::minIOI = 0.070;
 double Induction::maxIOI = 2.500;

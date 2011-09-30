@@ -18,6 +18,8 @@
 
 #include "Event.h"
 
+#include <cmath>
+
 class AgentList;
 
 /** Agent is the central class for beat tracking.
@@ -191,7 +193,7 @@ public:
      *  1) The Agent has no beats yet; the Event is accepted as the first beat.
      *  2) The Event is beyond expiryTime seconds after the Agent's last 'confirming' beat; the Agent is terminated.
      *  3) The Event is within the innerMargin of the beat prediction; it is accepted as a beat.
-     *  4) The Event is within the outerMargin's of the beat prediction; it is accepted as a beat by this Agent,
+     *  4) The Event is within the postMargin's of the beat prediction; it is accepted as a beat by this Agent,
      *     and a new Agent is created which doesn't accept it as a beat.
      *  5) The Event is ignored because it is outside the windows around the Agent's predicted beat time.
      * @param e The Event to be tested
