@@ -16,6 +16,9 @@
 #include "BeatRootVampPlugin.h"
 #include "BeatRootProcessor.h"
 
+#include "Event.h"
+
+#include <vamp-sdk/RealTime.h>
 #include <vamp-sdk/PluginAdapter.h>
 
 BeatRootVampPlugin::BeatRootVampPlugin(float inputSampleRate) :
@@ -197,14 +200,29 @@ BeatRootVampPlugin::reset()
 BeatRootVampPlugin::FeatureSet
 BeatRootVampPlugin::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
 {
-    // Do actual work!
+    m_processor->processFrame(inputBuffers);
     return FeatureSet();
 }
 
 BeatRootVampPlugin::FeatureSet
 BeatRootVampPlugin::getRemainingFeatures()
 {
-    return FeatureSet();
+    EventList el = m_processor->beatTrack();
+    
+    Feature f;
+    f.hasTimestamp = true;
+    f.hasDuration = false;
+    f.label = "";
+    f.values.clear();
+
+    FeatureSet fs;
+
+    for (int i = 0; i < el.size(); ++i) {
+        f.timestamp = Vamp::RealTime::frame2RealTime(el[i].time, m_inputSampleRate);
+        fs[0].push_back(f);
+    }
+
+    return fs;
 }
 
 

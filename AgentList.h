@@ -88,7 +88,7 @@ protected:
 	 if (itr->phaseScore < 0.0) // already flagged for deletion
 	     continue;
 	 iterator itr2 = itr;
-	 for (++itr2; itr != end(); ++itr) {
+	 for (++itr2; itr2 != end(); ++itr2) {
 	     if (itr2->beatInterval - itr->beatInterval > DEFAULT_BI)
 		 break;
 	     if (fabs(itr->beatTime - itr2->beatTime) > DEFAULT_BT)
@@ -168,6 +168,7 @@ public:
 	    double best = -1.0;
 	    Agent *bestAg = 0;
 	    for (iterator itr = begin(); itr != end(); ++itr) {
+		if (itr->events.empty()) continue;
 		double startTime = itr->events.begin()->time;
 		double conf = (itr->phaseScore + itr->tempoScore) /
 		    (useAverageSalience? (double)itr->beatCount: 1.0);

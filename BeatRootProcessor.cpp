@@ -18,15 +18,3 @@
 bool
 BeatRootProcessor::silent = true;
 
-double
-BeatRootProcessor::silenceThreshold = 0.0004;
-
-double
-BeatRootProcessor::rangeThreshold = 10;
-
-int
-BeatRootProcessor::normaliseMode = 2;
-
-//int
-//BeatRootProcessor::energyOversampleFactor = 2;
-

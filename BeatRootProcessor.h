@@ -51,15 +51,6 @@ protected:
     /** The size of an FFT frame in samples (see <code>fftTime</code>) */
     int fftSize;
 
-    /** The number of overlapping frames of audio data which have been read. */
-    int frameCount;
-
-    /** RMS amplitude of the current frame. */
-    double frameRMS;
-
-    /** Long term average frame energy (in frequency domain representation). */
-    double ltAverage;
-
     /** Spectral flux onset detection function, indexed by frame. */
     vector<double> spectralFlux;
 	
@@ -79,16 +70,7 @@ protected:
     /** The magnitude spectrum of the most recent frame.  Used for
      *  calculating the spectral flux. */
     vector<double> prevFrame;
-	
-    /** The magnitude spectrum of the current frame. */
-    vector<double> newFrame;
 
-    /** The magnitude spectra of all frames, used for plotting the spectrogram. */
-    vector<vector<double> > frames; //!!! do we need this? much cheaper to lose it if we don't
-	
-    /** The RMS energy of all frames. */
-//    vector<double> energy; //!!! unused in beat tracking?
-	
     /** The estimated onset times from peak-picking the onset
      * detection function(s). */
     vector<double> onsets;
@@ -99,38 +81,12 @@ protected:
     /** Flag for suppressing all standard output messages except results. */
     static bool silent;
 	
-    /** RMS frame energy below this value results in the frame being
-     *  set to zero, so that normalisation does not have undesired
-     *  side-effects. */
-    static double silenceThreshold; //!!!??? energy of what? should not be static?
-	
-    /** For dynamic range compression, this value is added to the log
-     *  magnitude in each frequency bin and any remaining negative
-     *  values are then set to zero.
-     */
-    static double rangeThreshold; //!!! sim
-	
-    /** Determines method of normalisation. Values can be:<ul>
-     *  <li>0: no normalisation</li>
-     *  <li>1: normalisation by current frame energy</li>
-     *  <li>2: normalisation by exponential average of frame energy</li>
-     *  </ul>
-     */
-    static int normaliseMode;
-	
-    /** Ratio between rate of sampling the signal energy (for the
-     * amplitude envelope) and the hop size */
-//    static int energyOversampleFactor; //!!! not used?
-	
 public:
 
     /** Constructor: note that streams are not opened until the input
      *  file is set (see <code>setInputFile()</code>). */
     BeatRootProcessor(float sr) :
         sampleRate(sr) {
-        frameRMS = 0;
-        ltAverage = 0;
-        frameCount = 0;
         hopSize = 0;
         fftSize = 0;
         hopTime = 0.010;
@@ -143,15 +99,60 @@ public:
         init();
     }
 
+    /** Processes a frame of frequency-domain audio data by mapping
+     *  the frequency bins into a part-linear part-logarithmic array,
+     *  then computing the spectral flux then (optionally) normalising
+     *  and calculating onsets.
+     */
+    void processFrame(const float *const *inputBuffers) {
+        double flux = 0;
+        for (int i = 0; i <= fftSize/2; i++) {
+            double mag = sqrt(inputBuffers[0][i*2] * inputBuffers[0][i*2] +
+                              inputBuffers[0][i*2+1] * inputBuffers[0][i*2+1]);
+            if (mag > prevFrame[i]) flux += mag - prevFrame[i];
+            prevFrame[i] = mag;
+        }
+
+        spectralFlux.push_back(flux);
+
+    } // processFrame()
+
+    /** Tracks beats once all frames have been processed by processFrame
+     */
+    EventList beatTrack() {
+		
+        double hop = hopTime;
+        Peaks::normalise(spectralFlux);
+        vector<int> peaks = Peaks::findPeaks(spectralFlux, (int)lrint(0.06 / hop), 0.35, 0.84, true);
+        onsets.clear();
+        onsets.resize(peaks.size(), 0);
+        vector<int>::iterator it = peaks.begin();
+        onsetList.clear();
+        double minSalience = Peaks::min(spectralFlux);
+        for (int i = 0; i < onsets.size(); i++) {
+            int index = *it;
+            ++it;
+            onsets[i] = index * hop;
+            Event e = BeatTracker::newBeat(onsets[i], 0);
+//			if (debug)
+//				System.err.printf("Onset: %8.3f  %8.3f  %8.3f\n",
+//						onsets[i], energy[index], slope[index]);
+//			e.salience = slope[index];	// or combination of energy + slope??
+            // Note that salience must be non-negative or the beat tracking system fails!
+            e.salience = spectralFlux[index] - minSalience;
+            onsetList.push_back(e);
+        }
+
+        return BeatTracker::beatTrack(onsetList);
+
+    } // processFile()
+
 protected:
     /** Allocates memory for arrays, based on parameter settings */
     void init() {
         makeFreqMap(fftSize, sampleRate);
         prevFrame.clear();
-        for (int i = 0; i < freqMapSize; i++) prevFrame.push_back(0);
-        frameCount = 0;
-        frameRMS = 0;
-        ltAverage = 0;
+        for (int i = 0; i <= fftSize/2; i++) prevFrame.push_back(0);
         spectralFlux.clear();
     } // init()
 
@@ -179,136 +180,6 @@ protected:
         }
         freqMapSize = freqMap[i-1] + 1;
     } // makeFreqMap()
-
-    /** Processes a frame of frequency-domain audio data by mapping
-     *  the frequency bins into a part-linear part-logarithmic array,
-     *  then computing the spectral flux then (optionally) normalising
-     *  and calculating onsets.
-     */
-    void processFrame(const float *const *inputBuffers) {
-        newFrame.clear();
-        for (int i = 0; i < freqMapSize; i++) {
-            newFrame.push_back(0);
-        }
-        double flux = 0;
-        for (int i = 0; i <= fftSize/2; i++) {
-            double mag = sqrt(inputBuffers[0][i*2] * inputBuffers[0][i*2] +
-                              inputBuffers[0][i*2+1] * inputBuffers[0][i*2+1]);
-            if (mag > prevFrame[i]) flux += mag - prevFrame[i];
-            prevFrame[i] = mag;
-            newFrame[freqMap[i]] += mag;
-        }
-        spectralFlux.push_back(flux);
-        frames.push_back(newFrame);
-//        for (int i = 0; i < freqMapSize; i++)
-//            [frameCount][i] = newFrame[i];
-/*
-        int index = cbIndex - (fftSize - hopSize);
-        if (index < 0)
-            index += fftSize;
-        int sz = (fftSize - hopSize) / energyOversampleFactor;
-        for (int j = 0; j < energyOversampleFactor; j++) {
-            double newEnergy = 0;
-            for (int i = 0; i < sz; i++) {
-                newEnergy += circBuffer[index] * circBuffer[index];
-                if (++index == fftSize)
-                    index = 0;
-            }
-            energy[frameCount * energyOversampleFactor + j] =
-                newEnergy / sz <= 1e-6? 0: log(newEnergy / sz) + 13.816;
-                }*/
-
-        double decay = frameCount >= 200? 0.99:
-            (frameCount < 100? 0: (frameCount - 100) / 100.0);
-
-        //!!! uh-oh -- frameRMS has not been calculated (it came from time-domain signal) -- will always appear silent
-
-        if (ltAverage == 0)
-            ltAverage = frameRMS;
-        else
-            ltAverage = ltAverage * decay + frameRMS * (1.0 - decay);
-        if (frameRMS <= silenceThreshold)
-            for (int i = 0; i < freqMapSize; i++)
-                frames[frameCount][i] = 0;
-        else {
-            if (normaliseMode == 1)
-                for (int i = 0; i < freqMapSize; i++)
-                    frames[frameCount][i] /= frameRMS;
-            else if (normaliseMode == 2)
-                for (int i = 0; i < freqMapSize; i++)
-                    frames[frameCount][i] /= ltAverage;
-            for (int i = 0; i < freqMapSize; i++) {
-                frames[frameCount][i] = log(frames[frameCount][i]) + rangeThreshold;
-                if (frames[frameCount][i] < 0)
-                    frames[frameCount][i] = 0;
-            }
-        }
-//			weightedPhaseDeviation();
-//			if (debug)
-//				System.err.printf("PhaseDev:  t=%7.3f  phDev=%7.3f  RMS=%7.3f\n",
-//						frameCount * hopTime,
-//						phaseDeviation[frameCount],
-//						frameRMS);
-        frameCount++;
-    } // processFrame()
-
-    /** Processes a complete file of audio data. */
-    void processFile() {
-/*
-        while (pcmInputStream != null) {
-            // Profile.start(0);
-            processFrame();
-            // Profile.log(0);
-            if (Thread.currentThread().isInterrupted()) {
-                System.err.println("info: INTERRUPTED in processFile()");
-                return;
-            }
-        }
-*/
-//		double[] x1 = new double[phaseDeviation.length];
-//		for (int i = 0; i < x1.length; i++) {
-//			x1[i] = i * hopTime;
-//			phaseDeviation[i] = (phaseDeviation[i] - 0.4) * 100;
-//		}
-//		double[] x2 = new double[energy.length];
-//		for (int i = 0; i < x2.length; i++)
-//			x2[i] = i * hopTime / energyOversampleFactor;
-//		// plot.clear();
-//		plot.addPlot(x1, phaseDeviation, Color.green, 7);
-//		plot.addPlot(x2, energy, Color.red, 7);
-//		plot.setTitle("Test phase deviation");
-//		plot.fitAxes();
-
-//		double[] slope = new double[energy.length];
-//		double hop = hopTime / energyOversampleFactor;
-//		Peaks.getSlope(energy, hop, 15, slope);
-//		vector<Integer> peaks = Peaks.findPeaks(slope, (int)lrint(0.06 / hop), 10);
-		
-        double hop = hopTime;
-        Peaks::normalise(spectralFlux);
-        vector<int> peaks = Peaks::findPeaks(spectralFlux, (int)lrint(0.06 / hop), 0.35, 0.84, true);
-        onsets.clear();
-        onsets.resize(peaks.size(), 0);
-        vector<int>::iterator it = peaks.begin();
-        onsetList.clear();
-        double minSalience = Peaks::min(spectralFlux);
-        for (int i = 0; i < onsets.size(); i++) {
-            int index = *it;
-            ++it;
-            onsets[i] = index * hop;
-            Event e = BeatTracker::newBeat(onsets[i], 0);
-//			if (debug)
-//				System.err.printf("Onset: %8.3f  %8.3f  %8.3f\n",
-//						onsets[i], energy[index], slope[index]);
-//			e.salience = slope[index];	// or combination of energy + slope??
-            // Note that salience must be non-negative or the beat tracking system fails!
-            e.salience = spectralFlux[index] - minSalience;
-            onsetList.push_back(e);
-        }
-
-        //!!! This onsetList is then fed in to BeatTrackDisplay::beatTrack
-
-    } // processFile()
 
 }; // class AudioProcessor
 
