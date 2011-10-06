@@ -1,5 +1,5 @@
 
-CXXFLAGS	:= -g
+CXXFLAGS	:= -g -DDEBUG_BEATROOT
 
 OBJECTS	:= BeatRootProcessor.o BeatRootVampPlugin.o Peaks.o Agent.o AgentList.o Induction.o
 

@@ -22,6 +22,10 @@
 
 #include <vector>
 
+#ifdef DEBUG_BEATROOT
+#include <iostream>
+#endif
+
 using std::vector;
 
 /** Performs tempo induction by finding clusters of similar
@@ -227,6 +231,9 @@ public:
 		a.push_back(Agent(beat));
 	    }
 	}
+#ifdef DEBUG_BEATROOT
+        std::cerr << "Induction complete, returning " << a.size() << " agent(s)" << std::endl;
+#endif
 	return a;
     } // beatInduction()
 

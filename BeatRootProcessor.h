@@ -23,6 +23,10 @@
 #include <vector>
 #include <cmath>
 
+#ifdef DEBUG_BEATROOT
+#include <iostream>
+#endif
+
 using std::vector;
 
 class BeatRootProcessor
@@ -142,6 +146,10 @@ public:
             e.salience = spectralFlux[index] - minSalience;
             onsetList.push_back(e);
         }
+
+#ifdef DEBUG_BEATROOT
+        std::cerr << "Onsets: " << onsetList.size() << std::endl;
+#endif
 
         return BeatTracker::beatTrack(onsetList);
 

@@ -20,6 +20,10 @@
 
 #include <cmath>
 
+#ifdef DEBUG_BEATROOT
+#include <iostream>
+#endif
+
 class AgentList;
 
 /** Agent is the central class for beat tracking.
@@ -116,30 +120,6 @@ public:
      *  @param ibi The beat period (inter-beat interval) of the Agent's tempo hypothesis.
      */
     Agent(double ibi) {
-	init(ibi);
-    } // constructor
-
-    /** Copy constructor.
-     *  @param clone The Agent to duplicate. */
-    Agent(const Agent &clone) {
-	idNumber = idCounter++;
-	phaseScore = clone.phaseScore;
-	tempoScore = clone.tempoScore;
-	topScoreTime = clone.topScoreTime;
-	beatCount = clone.beatCount;
-	beatInterval = clone.beatInterval;
-	initialBeatInterval = clone.initialBeatInterval;
-	beatTime = clone.beatTime;
-	events = EventList(clone.events);
-	postMargin = clone.postMargin;
-	preMargin = clone.preMargin;
-    } // copy constructor
-
-protected:
-    /** Initialise all the fields of this Agent.
-     *  @param ibi The initial tempo hypothesis of the Agent.
-     */
-    void init(double ibi) {
 	innerMargin = INNER_MARGIN;
 	correctionFactor = DEFAULT_CORRECTION_FACTOR;
 	expiryTime = DEFAULT_EXPIRY_TIME;
@@ -154,10 +134,15 @@ protected:
 	topScoreTime = 0.0;
 	beatCount = 0;
 	beatTime = -1.0;
-	events.clear();
-    } // init()
+    } // constructor
 
+    Agent clone() const {
+        Agent a(*this);
+        a.idCounter++;
+        return a;
+    }
 
+protected:
     double threshold(double value, double min, double max) {
 	if (value < min)
 	    return min;
@@ -187,6 +172,12 @@ public:
 		(1.0 - memFactor) * conFactor * e.salience;
 	} else
 	    phaseScore += conFactor * e.salience;
+#ifdef DEBUG_BEATROOT
+        std::cerr << "Ag#" << idNumber << ": " << beatInterval << std::endl;
+        std::cerr << "  Beat" << beatCount << "  Time=" << beatTime
+                  << "  Score=" << tempoScore << ":P" << phaseScore << ":"
+                  << topScoreTime << std::endl;
+#endif
     } // accept()
 
     /** The given Event is tested for a possible beat time. The following situations can occur:

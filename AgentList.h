@@ -21,6 +21,10 @@
 
 #include <algorithm>
 
+#ifdef DEBUG_BEATROOT
+#include <iostream>
+#endif
+
 /** Class for maintaining the set of all Agents involved in beat tracking a piece of music.
  */
 class AgentList
@@ -38,7 +42,13 @@ public:
     bool empty() const { return list.empty(); }
     Container::iterator begin() { return list.begin(); }
     Container::iterator end() { return list.end(); }
-    void push_back(const Agent &a) { list.push_back(a); }
+    size_t size() { return list.size(); }
+    void push_back(const Agent &a) {
+        list.push_back(a);
+#ifdef DEBUG_BEATROOT
+        std::cerr << "  Added Ag#" << a.idNumber << ", have " << list.size() << " agent(s)" << std::endl;
+#endif
+    }
 
     /** Flag for choice between sum and average beat salience values for Agent scores.
      *  The use of summed saliences favours faster tempi or lower metrical levels. */
@@ -61,7 +71,7 @@ public:
      *  @param sort Flag indicating whether the list is sorted or not
      */
     void add(Agent newAgent, bool sort){
-	list.push_back(newAgent);
+        push_back(newAgent);
 	if (sort) this->sort();
     } // add()/2
 
@@ -105,13 +115,24 @@ protected:
 		}
 	    }
 	}
+        int removed = 0;
 	for (iterator itr = begin(); itr != end(); ) {
 	    if (itr->phaseScore < 0.0) {
+                ++removed;
 		list.erase(itr);
 	    } else {
 		++itr;
 	    }
 	}
+#ifdef DEBUG_BEATROOT
+        if (removed > 0) {
+            std::cerr << "removeDuplicates: removed " << removed << ", have "
+                      << list.size() << " agent(s) remaining" << std::endl;
+        }
+        for (int i = 0; i <list.size(); ++i) {
+            std::cerr << "agent " << i  << ": time " << list[i].beatTime << std::endl;
+        }
+#endif
     } // removeDuplicates()
 
 public:
@@ -136,26 +157,33 @@ public:
 		break;
 	    bool created = phaseGiven;
 	    double prevBeatInterval = -1.0;
-	    // cc: Duplicate our list of agents, and scan through
-	    // the (now immutable) copy.  This means we can safely
-	    // add agents to our own list while scanning without
-	    // disrupting our scan.
+	    // cc: Duplicate our list of agents, and scan through the
+	    // copy.  This means we can safely add agents to our own
+	    // list while scanning without disrupting our scan.  Each
+	    // agent needs to be re-added to our own list explicitly
+	    // (since it is modified by e.g. considerAsBeat)
 	    Container currentAgents = list;
+            list.clear();
 	    for (Container::iterator ai = currentAgents.begin();
 		 ai != currentAgents.end(); ++ai) {
 		Agent currentAgent = *ai;
 		if (currentAgent.beatInterval != prevBeatInterval) {
 		    if ((prevBeatInterval>=0) && !created && (ev.time<5.0)) {
+#ifdef DEBUG_BEATROOT
+                        std::cerr << "Creating a new agent" << std::endl;
+#endif
 			// Create new agent with different phase
 			Agent newAgent(prevBeatInterval);
-			// This may add an agent to our list
+			// This may add another agent to our list as well
 			newAgent.considerAsBeat(ev, *this);
+                        add(newAgent);
 		    }
 		    prevBeatInterval = currentAgent.beatInterval;
 		    created = phaseGiven;
 		}
 		if (currentAgent.considerAsBeat(ev, *this))
 		    created = true;
+                add(currentAgent);
 	    } // loop for each agent
 	    removeDuplicates();
 	} // loop for each event
@@ -177,6 +205,14 @@ public:
 		best = conf;
 	    }
 	}
+#ifdef DEBUG_BEATROOT
+        if (bestAg) {
+            std::cerr << "Best agent: Ag#" << bestAg->idNumber << std::endl;
+            std::cerr << "  Av-salience = " << best << std::endl;
+        } else {
+            std::cerr << "No surviving agent - beat tracking failed" << std::endl;
+        }
+#endif
 	return bestAg;
     } // bestAgent()
 
