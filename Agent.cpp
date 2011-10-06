@@ -75,21 +75,19 @@ void Agent::fillBeats(double start) {
     double prevBeat = 0, nextBeat, currentInterval, beats;
     EventList::iterator ei = events.begin();
     if (ei != events.end()) {
-	++ei;
-	prevBeat = ei->time;
-	--ei;
+        EventList::iterator ni = ei;
+	prevBeat = (++ni)->time;
     }
-    for ( ; ei != events.end(); ++ei) {
-	++ei;
-	nextBeat = ei->time;
-	--ei; // so as to insert before nextBeat
+    for ( ; ei != events.end(); ) {
+        EventList::iterator ni = ei;
+	nextBeat = (++ni)->time;
 	beats = nearbyint((nextBeat - prevBeat) / beatInterval - 0.01); //prefer slow
 	currentInterval = (nextBeat - prevBeat) / beats;
 	for ( ; (nextBeat > start) && (beats > 1.5); beats--) {
 	    prevBeat += currentInterval;
-            events.insert(ei, BeatTracker::newBeat(prevBeat, 0));
-            ++ei;
+            events.insert(ni, BeatTracker::newBeat(prevBeat, 0));
 	}
 	prevBeat = nextBeat;
+        ei = ni;
     }
 } // fillBeats()

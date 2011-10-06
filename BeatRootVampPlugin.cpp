@@ -217,8 +217,8 @@ BeatRootVampPlugin::getRemainingFeatures()
 
     FeatureSet fs;
 
-    for (int i = 0; i < el.size(); ++i) {
-        f.timestamp = Vamp::RealTime::frame2RealTime(el[i].time, m_inputSampleRate);
+    for (EventList::const_iterator i = el.begin(); i != el.end(); ++i) {
+        f.timestamp = Vamp::RealTime::fromSeconds(i->time);
         fs[0].push_back(f);
     }
 

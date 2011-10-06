@@ -16,7 +16,7 @@
 #ifndef _EVENT_H_
 #define _EVENT_H_
 
-#include <vector>
+#include <list>
 
 struct Event {
     double time;
@@ -34,7 +34,7 @@ struct Event {
     }
 };
 
-typedef std::vector<Event> EventList;
+typedef std::list<Event> EventList;
 
 #endif
 

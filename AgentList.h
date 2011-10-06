@@ -19,6 +19,7 @@
 #include "Agent.h"
 #include "Event.h"
 
+#include <vector>
 #include <algorithm>
 
 #ifdef DEBUG_BEATROOT
