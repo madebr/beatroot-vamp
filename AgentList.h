@@ -130,8 +130,9 @@ protected:
             std::cerr << "removeDuplicates: removed " << removed << ", have "
                       << list.size() << " agent(s) remaining" << std::endl;
         }
-        for (int i = 0; i <list.size(); ++i) {
-            std::cerr << "agent " << i  << ": time " << list[i].beatTime << std::endl;
+        int n = 0;
+        for (Container::iterator i = list.begin(); i != list.end(); ++i) {
+            std::cerr << "agent " << n++ << ": time " << i->beatTime << std::endl;
         }
 #endif
     } // removeDuplicates()

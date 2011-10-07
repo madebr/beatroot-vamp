@@ -124,6 +124,11 @@ public:
     /** Tracks beats once all frames have been processed by processFrame
      */
     EventList beatTrack() {
+
+        for (int i = 0; i < spectralFlux.size(); ++i) {
+            if ((i % 8) == 0) std::cerr << "\n";
+            std::cerr << spectralFlux[i] << " ";
+        }
 		
         double hop = hopTime;
         Peaks::normalise(spectralFlux);

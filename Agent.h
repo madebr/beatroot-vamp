@@ -138,7 +138,7 @@ public:
 
     Agent clone() const {
         Agent a(*this);
-        a.idCounter++;
+        a.idNumber = idCounter++;
         return a;
     }
 
