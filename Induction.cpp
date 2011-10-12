@@ -183,7 +183,7 @@ AgentList Induction::beatInduction(EventList events) {
         while (beat > maxIBI)		// Minimum speed
             beat /= 2.0;
         if (beat >= minIBI) {
-            a.push_back(Agent(beat));
+            a.push_back(new Agent(beat));
         }
     }
 #ifdef DEBUG_BEATROOT

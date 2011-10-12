@@ -31,7 +31,7 @@
 class AgentList
 {
 public:
-    typedef std::vector<Agent> Container;
+    typedef std::vector<Agent *> Container;
     typedef Container::iterator iterator;
 
 protected:
@@ -44,10 +44,10 @@ public:
     Container::iterator begin() { return list.begin(); }
     Container::iterator end() { return list.end(); }
     size_t size() { return list.size(); }
-    void push_back(const Agent &a) {
+    void push_back(Agent *a) {
         list.push_back(a);
 #ifdef DEBUG_BEATROOT
-        std::cerr << "  Added Ag#" << a.idNumber << ", have " << list.size() << " agent(s)" << std::endl;
+        std::cerr << "  Added Ag#" << a->idNumber << ", have " << list.size() << " agent(s)" << std::endl;
 #endif
     }
 
@@ -62,7 +62,7 @@ public:
     static const double DEFAULT_BT;
 
     /** Inserts newAgent into the list in ascending order of beatInterval */
-    void add(Agent a) {
+    void add(Agent *a) {
 	add(a, true);
     } // add()/1
 
@@ -71,7 +71,7 @@ public:
      *  @param newAgent The agent to be added to the list
      *  @param sort Flag indicating whether the list is sorted or not
      */
-    void add(Agent newAgent, bool sort){
+    void add(Agent *newAgent, bool sort){
         push_back(newAgent);
 	if (sort) this->sort();
     } // add()/2

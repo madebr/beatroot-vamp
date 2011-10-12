@@ -136,9 +136,9 @@ public:
 	beatTime = -1.0;
     } // constructor
 
-    Agent clone() const {
-        Agent a(*this);
-        a.idNumber = idCounter++;
+    Agent *clone() const {
+        Agent *a = new Agent(*this);
+        a->idNumber = idCounter++;
         return a;
     }
 

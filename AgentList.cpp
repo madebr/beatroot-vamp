@@ -23,30 +23,31 @@ void AgentList::removeDuplicates()
 {
     sort();
     for (iterator itr = begin(); itr != end(); ++itr) {
-        if (itr->phaseScore < 0.0) // already flagged for deletion
+        if ((*itr)->phaseScore < 0.0) // already flagged for deletion
             continue;
         iterator itr2 = itr;
         for (++itr2; itr2 != end(); ++itr2) {
-            if (itr2->beatInterval - itr->beatInterval > DEFAULT_BI)
+            if ((*itr2)->beatInterval - (*itr)->beatInterval > DEFAULT_BI)
                 break;
-            if (fabs(itr->beatTime - itr2->beatTime) > DEFAULT_BT)
+            if (fabs((*itr)->beatTime - (*itr2)->beatTime) > DEFAULT_BT)
                 continue;
-            if (itr->phaseScore < itr2->phaseScore) {
-                itr->phaseScore = -1.0;	// flag for deletion
-                if (itr2->topScoreTime < itr->topScoreTime)
-                    itr2->topScoreTime = itr->topScoreTime;
+            if ((*itr)->phaseScore < (*itr2)->phaseScore) {
+                (*itr)->phaseScore = -1.0;	// flag for deletion
+                if ((*itr2)->topScoreTime < (*itr)->topScoreTime)
+                    (*itr2)->topScoreTime = (*itr)->topScoreTime;
                 break;
             } else {
-                itr2->phaseScore = -1.0;	// flag for deletion
-                if (itr->topScoreTime < itr2->topScoreTime)
-                    itr->topScoreTime = itr2->topScoreTime;
+                (*itr2)->phaseScore = -1.0;	// flag for deletion
+                if ((*itr)->topScoreTime < (*itr2)->topScoreTime)
+                    (*itr)->topScoreTime = (*itr2)->topScoreTime;
             }
         }
     }
     int removed = 0;
     for (iterator itr = begin(); itr != end(); ) {
-        if (itr->phaseScore < 0.0) {
+        if ((*itr)->phaseScore < 0.0) {
             ++removed;
+            delete *itr;
             list.erase(itr);
         } else {
             ++itr;
@@ -59,7 +60,7 @@ void AgentList::removeDuplicates()
     }
     int n = 0;
     for (Container::iterator i = list.begin(); i != list.end(); ++i) {
-        std::cerr << "agent " << n++ << ": time " << i->beatTime << std::endl;
+        std::cerr << "agent " << n++ << ": time " << (*i)->beatTime << std::endl;
     }
 #endif
 } // removeDuplicates()
@@ -68,7 +69,7 @@ void AgentList::removeDuplicates()
 void AgentList::beatTrack(EventList el, double stop)
 {
     EventList::iterator ei = el.begin();
-    bool phaseGiven = !empty() && (begin()->beatTime >= 0); // if given for one, assume given for others
+    bool phaseGiven = !empty() && ((*begin())->beatTime >= 0); // if given for one, assume given for others
     while (ei != el.end()) {
         Event ev = *ei;
         ++ei;
@@ -85,22 +86,22 @@ void AgentList::beatTrack(EventList el, double stop)
         list.clear();
         for (Container::iterator ai = currentAgents.begin();
              ai != currentAgents.end(); ++ai) {
-            Agent currentAgent = *ai;
-            if (currentAgent.beatInterval != prevBeatInterval) {
+            Agent *currentAgent = *ai;
+            if (currentAgent->beatInterval != prevBeatInterval) {
                 if ((prevBeatInterval>=0) && !created && (ev.time<5.0)) {
 #ifdef DEBUG_BEATROOT
                     std::cerr << "Creating a new agent" << std::endl;
 #endif
                     // Create new agent with different phase
-                    Agent newAgent(prevBeatInterval);
+                    Agent *newAgent = new Agent(prevBeatInterval);
                     // This may add another agent to our list as well
-                    newAgent.considerAsBeat(ev, *this);
+                    newAgent->considerAsBeat(ev, *this);
                     add(newAgent);
                 }
-                prevBeatInterval = currentAgent.beatInterval;
+                prevBeatInterval = currentAgent->beatInterval;
                 created = phaseGiven;
             }
-            if (currentAgent.considerAsBeat(ev, *this))
+            if (currentAgent->considerAsBeat(ev, *this))
                 created = true;
             add(currentAgent);
         } // loop for each agent
@@ -113,12 +114,12 @@ Agent *AgentList::bestAgent()
     double best = -1.0;
     Agent *bestAg = 0;
     for (iterator itr = begin(); itr != end(); ++itr) {
-        if (itr->events.empty()) continue;
-        double startTime = itr->events.begin()->time;
-        double conf = (itr->phaseScore + itr->tempoScore) /
-            (useAverageSalience? (double)itr->beatCount: 1.0);
+        if ((*itr)->events.empty()) continue;
+        double startTime = (*itr)->events.begin()->time;
+        double conf = ((*itr)->phaseScore + (*itr)->tempoScore) /
+            (useAverageSalience? (double)(*itr)->beatCount: 1.0);
         if (conf > best) {
-            bestAg = &(*itr);
+            bestAg = *itr;
             best = conf;
         }
     }

@@ -81,11 +81,13 @@ bool Agent::considerAsBeat(Event e, AgentList &a) {
         std::cerr << "Ag#" << idNumber << ": time " << e.time << ", err " << err << " for beats " << beats << std::endl;
 #endif
 	if ((beats > 0) && (-preMargin <= err) && (err <= postMargin)) {
-	    if (fabs(err) > innerMargin) {	// Create new agent that skips this
+	    if (fabs(err) > innerMargin) {
 #ifdef DEBUG_BEATROOT
                 std::cerr << "Ag#" << idNumber << ": creating another new agent" << std::endl;
 #endif
-		a.add(clone());	//  event (avoids large phase jump)
+                // Create new agent that skips this event (avoids
+                // large phase jump)
+		a.add(clone());
             }
 	    accept(e, err, (int)beats);
 	    return true;
@@ -102,9 +104,11 @@ void Agent::fillBeats(double start) {
         EventList::iterator ni = ei;
 	prevBeat = (++ni)->time;
     }
-    for ( ; ei != events.end(); ) {
+    while (ei != events.end()) {
         EventList::iterator ni = ei;
-	nextBeat = (++ni)->time;
+        ++ni;
+        if (ni == events.end()) break;
+	nextBeat = ni->time;
 	beats = nearbyint((nextBeat - prevBeat) / beatInterval - 0.01); //prefer slow
 	currentInterval = (nextBeat - prevBeat) / beats;
 	for ( ; (nextBeat > start) && (beats > 1.5); beats--) {
