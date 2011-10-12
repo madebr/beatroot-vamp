@@ -157,28 +157,7 @@ public:
      *  @param err The difference between the predicted and actual beat times.
      *  @param beats The number of beats since the last beat that matched an Event.
      */
-    void accept(Event e, double err, int beats) {
-	beatTime = e.time;
-	events.push_back(e);
-	if (fabs(initialBeatInterval - beatInterval -
-		 err / correctionFactor) < MAX_CHANGE * initialBeatInterval)
-	    beatInterval += err / correctionFactor;// Adjust tempo
-	beatCount += beats;
-	double conFactor = 1.0 - CONF_FACTOR * err /
-	    (err>0? postMargin: -preMargin);
-	if (decayFactor > 0) {
-	    double memFactor = 1. - 1. / threshold((double)beatCount,1,decayFactor);
-	    phaseScore = memFactor * phaseScore +
-		(1.0 - memFactor) * conFactor * e.salience;
-	} else
-	    phaseScore += conFactor * e.salience;
-#ifdef DEBUG_BEATROOT
-        std::cerr << "Ag#" << idNumber << ": " << beatInterval << std::endl;
-        std::cerr << "  Beat" << beatCount << "  Time=" << beatTime
-                  << "  Score=" << tempoScore << ":P" << phaseScore << ":"
-                  << topScoreTime << std::endl;
-#endif
-    } // accept()
+    void accept(Event e, double err, int beats);
 
     /** The given Event is tested for a possible beat time. The following situations can occur:
      *  1) The Agent has no beats yet; the Event is accepted as the first beat.

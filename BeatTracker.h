@@ -65,64 +65,7 @@ public:
      *  @param beats The initial beats which are given, if any
      *  @return The list of beats, or an empty list if beat tracking fails
      */
-    static EventList beatTrack(EventList events, EventList beats) {
-	AgentList agents;
-	int count = 0;
-	double beatTime = -1;
-	if (!beats.empty()) {
-	    count = beats.size() - 1;
-	    EventList::iterator itr = beats.end();
-	    --itr;
-	    beatTime = itr->time;
-	}
-	if (count > 0) { // tempo given by mean of initial beats
-	    double ioi = (beatTime - beats.begin()->time) / count;
-	    agents.push_back(Agent(ioi));
-	} else // tempo not given; use tempo induction
-	    agents = Induction::beatInduction(events);
-	if (!beats.empty())
-	    for (AgentList::iterator itr = agents.begin(); itr != agents.end();
-                 ++itr) {
-		itr->beatTime = beatTime;
-		itr->beatCount = count;
-		itr->events = beats;
-	    }
-	agents.beatTrack(events, -1);
-	Agent *best = agents.bestAgent();
-	if (best) {
-	    best->fillBeats(beatTime);
-	    return best->events;
-	}
-	return EventList();
-    } // beatTrack()/1
-	
-    /** Finds the mean tempo (as inter-beat interval) from an array of beat times
-     *  @param d An array of beat times
-     *  @return The average inter-beat interval
-     */
-    static double getAverageIBI(vector<double> d) {
-	if (d.size() < 2)
-	    return -1.0;
-	return (d[d.size() - 1] - d[0]) / (d.size() - 1);
-    } // getAverageIBI()
-	
-    /** Finds the median tempo (as inter-beat interval) from an array of beat times
-     *  @param d An array of beat times
-     *  @return The median inter-beat interval
-     */
-    static double getMedianIBI(vector<double> d) {
-	if (d.size() < 2)
-	    return -1.0;
-	vector<double> ibi;
-        ibi.resize(d.size()-1);
-	for (int i = 1; i < d.size(); i++)
-	    ibi[i-1] = d[i] - d[i-1];
-        std::sort(ibi.begin(), ibi.end());
-	if (ibi.size() % 2 == 0)
-	    return (ibi[ibi.size() / 2] + ibi[ibi.size() / 2 - 1]) / 2;
-	else
-	    return ibi[ibi.size() / 2];
-    } // getAverageIBI()
+    static EventList beatTrack(EventList events, EventList beats);
 	
 	
     // Various get and set methods

@@ -31,6 +31,30 @@ double Agent::correctionFactor = 0.0;
 double Agent::expiryTime = 0.0;
 double Agent::decayFactor = 0.0;
 
+void Agent::accept(Event e, double err, int beats) {
+    beatTime = e.time;
+    events.push_back(e);
+    if (fabs(initialBeatInterval - beatInterval -
+             err / correctionFactor) < MAX_CHANGE * initialBeatInterval)
+        beatInterval += err / correctionFactor;// Adjust tempo
+    beatCount += beats;
+    double conFactor = 1.0 - CONF_FACTOR * err /
+        (err>0? postMargin: -preMargin);
+    if (decayFactor > 0) {
+        double memFactor = 1. - 1. / threshold((double)beatCount,1,decayFactor);
+        phaseScore = memFactor * phaseScore +
+            (1.0 - memFactor) * conFactor * e.salience;
+    } else
+        phaseScore += conFactor * e.salience;
+
+#ifdef DEBUG_BEATROOT
+    std::cerr << "Ag#" << idNumber << ": " << beatInterval << std::endl;
+    std::cerr << "  Beat" << beatCount << "  Time=" << beatTime
+              << "  Score=" << tempoScore << ":P" << phaseScore << ":"
+              << topScoreTime << std::endl;
+#endif
+} // accept()
+
 bool Agent::considerAsBeat(Event e, AgentList &a) {
     double err;
     if (beatTime < 0) {	// first event
