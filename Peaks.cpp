@@ -58,6 +58,7 @@ vector<int> Peaks::findPeaks(const vector<double> &data, int width,
     vector<int> peaks;
     int maxp = 0;
     int mid = 0;
+    if (data.empty()) return peaks;
     int end = data.size();
     double av = data[0];
     while (mid < end) {

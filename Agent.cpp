@@ -102,12 +102,16 @@ void Agent::fillBeats(double start) {
     EventList::iterator ei = events.begin();
     if (ei != events.end()) {
         EventList::iterator ni = ei;
-	prevBeat = (++ni)->time;
+        if (++ni != events.end()) {
+            prevBeat = ni->time;
+        }
     }
     while (ei != events.end()) {
         EventList::iterator ni = ei;
-        ++ni;
-        if (ni == events.end()) break;
+        if (ni == events.end() ||
+            ++ni == events.end()) {
+            break;
+        }
 	nextBeat = ni->time;
 	beats = nearbyint((nextBeat - prevBeat) / beatInterval - 0.01); //prefer slow
 	currentInterval = (nextBeat - prevBeat) / beats;

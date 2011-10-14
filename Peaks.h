@@ -75,8 +75,14 @@ public:
     static void getSlope(const vector<double> &data, double hop, int n,
 			 vector<double> &slope);
 
-    static double min(const vector<double> &arr) { return arr[imin(arr)]; }
-    static double max(const vector<double> &arr) { return arr[imax(arr)]; }
+    static double min(const vector<double> &arr) {
+        if (arr.empty()) return 0;
+        return arr[imin(arr)];
+    }
+    static double max(const vector<double> &arr) {
+        if (arr.empty()) return 0;
+        return arr[imax(arr)];
+    }
 
     static int imin(const vector<double> &arr);
     static int imax(const vector<double> &arr);
