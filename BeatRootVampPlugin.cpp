@@ -154,6 +154,7 @@ BeatRootVampPlugin::getOutputDescriptors() const
     d.hasKnownExtents = false;
     d.isQuantized = false;
     d.sampleType = OutputDescriptor::VariableSampleRate;
+    d.sampleRate = m_inputSampleRate;
     d.hasDuration = false;
     list.push_back(d);
 
