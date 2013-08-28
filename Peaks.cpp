@@ -29,7 +29,7 @@ int Peaks::findPeaks(const vector<double> &data, vector<int> peaks, int width) {
         if (i < 0)
             i = 0;
         int stop = mid + width + 1;
-        if (stop > data.size())
+        if (stop > (int)data.size())
             stop = data.size();
         maxp = i;
         for (i++; i < stop; i++)
@@ -40,12 +40,12 @@ int Peaks::findPeaks(const vector<double> &data, vector<int> peaks, int width) {
             for (j = peakCount; j > 0; j--) {
                 if (data[maxp] <= data[peaks[j-1]])
                     break;
-                else if (j < peaks.size())
+                else if (j < (int)peaks.size())
                     peaks[j] = peaks[j-1];
             }
-            if (j != peaks.size())
+            if (j != (int)peaks.size())
                 peaks[j] = maxp;
-            if (peakCount != peaks.size())
+            if (peakCount != (int)peaks.size())
                 peakCount++;
         }
         mid++;
@@ -69,7 +69,7 @@ vector<int> Peaks::findPeaks(const vector<double> &data, int width,
         if (i < 0)
             i = 0;
         int stop = mid + width + 1;
-        if (stop > data.size())
+        if (stop > (int)data.size())
             stop = data.size();
         maxp = i;
         for (i++; i < stop; i++)
@@ -106,7 +106,7 @@ bool Peaks::overThreshold(const vector<double> &data, int index, int width,
         if (iStart < 0)
             iStart = 0;
         int iStop = index + post * width;
-        if (iStop > data.size())
+        if (iStop > (int)data.size())
             iStop = data.size();
         double sum = 0;
         int count = iStop - iStart;
@@ -120,7 +120,7 @@ bool Peaks::overThreshold(const vector<double> &data, int index, int width,
 void Peaks::normalise(vector<double> &data) {
     double sx = 0;
     double sxx = 0;
-    for (int i = 0; i < data.size(); i++) {
+    for (int i = 0; i < (int)data.size(); i++) {
         sx += data[i];
         sxx += data[i] * data[i];
     }
@@ -128,7 +128,7 @@ void Peaks::normalise(vector<double> &data) {
     double sd = sqrt((sxx - sx * mean) / data.size());
     if (sd == 0)
         sd = 1;		// all data[i] == mean  -> 0; avoids div by 0
-    for (int i = 0; i < data.size(); i++) {
+    for (int i = 0; i < (int)data.size(); i++) {
         data[i] = (data[i] - mean) / sd;
     }
 } // normalise()
@@ -154,18 +154,18 @@ void Peaks::getSlope(const vector<double> &data, double hop, int n,
     double delta = n * sxx - sx * sx;
     for ( ; j < n / 2; j++)
         slope[j] = (n * sxy - sx * sy) / delta;
-    for ( ; j < data.size() - (n + 1) / 2; j++, i++) {
+    for ( ; j < (int)data.size() - (n + 1) / 2; j++, i++) {
         slope[j] = (n * sxy - sx * sy) / delta;
         sy += data[i] - data[i - n];
         sxy += hop * (n * data[i] - sy);
     }
-    for ( ; j < data.size(); j++)
+    for ( ; j < (int)data.size(); j++)
         slope[j] = (n * sxy - sx * sy) / delta;
 } // getSlope()
 
 int Peaks::imin(const vector<double> &arr) {
     int i = 0;
-    for (int j = 1; j < arr.size(); j++)
+    for (int j = 1; j < (int)arr.size(); j++)
         if (arr[j] < arr[i])
             i = j;
     return i;
@@ -173,7 +173,7 @@ int Peaks::imin(const vector<double> &arr) {
 
 int Peaks::imax(const vector<double> &arr) {
     int i = 0;
-    for (int j = 1; j < arr.size(); j++)
+    for (int j = 1; j < (int)arr.size(); j++)
         if (arr[j] > arr[i])
             i = j;
     return i;

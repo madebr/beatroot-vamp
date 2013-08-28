@@ -117,10 +117,15 @@ public:
 protected:
     /** Allocates memory for arrays, based on parameter settings */
     void init() {
+#ifdef DEBUG_BEATROOT
+        std::cerr << "BeatRootProcessor::init()" << std::endl;
+#endif
         makeFreqMap(fftSize, sampleRate);
         prevFrame.clear();
         for (int i = 0; i <= fftSize/2; i++) prevFrame.push_back(0);
         spectralFlux.clear();
+        onsets.clear();
+        onsetList.clear();
     } // init()
 
     /** Creates a map of FFT frequency bins to comparison bins.
@@ -137,13 +142,16 @@ protected:
         int crossoverMidi = (int)lrint(log(crossoverBin*binWidth/440)/
                                        log(2) * 12 + 69);
         int i = 0;
-        while (i <= crossoverBin && i <= fftSize/2)
-            freqMap[i++] = i;
+        while (i <= crossoverBin && i <= fftSize/2) {
+            freqMap[i] = i;
+            ++i;
+        }
         while (i <= fftSize/2) {
             double midi = log(i*binWidth/440) / log(2) * 12 + 69;
             if (midi > 127)
                 midi = 127;
-            freqMap[i++] = crossoverBin + (int)lrint(midi) - crossoverMidi;
+            freqMap[i] = crossoverBin + (int)lrint(midi) - crossoverMidi;
+            ++i;
         }
         freqMapSize = freqMap[i-1] + 1;
     } // makeFreqMap()

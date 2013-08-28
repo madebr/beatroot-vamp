@@ -49,7 +49,7 @@ EventList BeatRootProcessor::beatTrack() {
     vector<int>::iterator it = peaks.begin();
     onsetList.clear();
     double minSalience = Peaks::min(spectralFlux);
-    for (int i = 0; i < onsets.size(); i++) {
+    for (int i = 0; i < (int)onsets.size(); i++) {
         int index = *it;
         ++it;
         onsets[i] = index * hop;

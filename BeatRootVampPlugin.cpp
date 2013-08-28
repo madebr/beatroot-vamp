@@ -209,7 +209,7 @@ BeatRootVampPlugin::FeatureSet
 BeatRootVampPlugin::getRemainingFeatures()
 {
     EventList el = m_processor->beatTrack();
-    
+
     Feature f;
     f.hasTimestamp = true;
     f.hasDuration = false;

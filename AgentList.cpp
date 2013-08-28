@@ -23,6 +23,9 @@ void AgentList::removeDuplicates()
 {
     sort();
     for (iterator itr = begin(); itr != end(); ++itr) {
+#ifdef DEBUG_BEATROOT
+        std::cerr << "removeDuplicates: considering agent " << (*itr)->idNumber << std::endl;
+#endif
         if ((*itr)->phaseScore < 0.0) // already flagged for deletion
             continue;
         iterator itr2 = itr;
@@ -32,11 +35,17 @@ void AgentList::removeDuplicates()
             if (fabs((*itr)->beatTime - (*itr2)->beatTime) > DEFAULT_BT)
                 continue;
             if ((*itr)->phaseScore < (*itr2)->phaseScore) {
+#ifdef DEBUG_BEATROOT
+                std::cerr << "agent " << (*itr)->idNumber << " is similar to but lower-scoring than agent " << (*itr2)->idNumber << ", marking for deletion" << std::endl;
+#endif
                 (*itr)->phaseScore = -1.0;	// flag for deletion
                 if ((*itr2)->topScoreTime < (*itr)->topScoreTime)
                     (*itr2)->topScoreTime = (*itr)->topScoreTime;
                 break;
             } else {
+#ifdef DEBUG_BEATROOT
+                std::cerr << "agent " << (*itr2)->idNumber << " is similar to but lower-scoring than agent " << (*itr)->idNumber << ", marking for deletion" << std::endl;
+#endif
                 (*itr2)->phaseScore = -1.0;	// flag for deletion
                 if ((*itr)->topScoreTime < (*itr2)->topScoreTime)
                     (*itr)->topScoreTime = (*itr2)->topScoreTime;
@@ -115,7 +124,6 @@ Agent *AgentList::bestAgent()
     Agent *bestAg = 0;
     for (iterator itr = begin(); itr != end(); ++itr) {
         if ((*itr)->events.empty()) continue;
-        double startTime = (*itr)->events.begin()->time;
         double conf = ((*itr)->phaseScore + (*itr)->tempoScore) /
             (useAverageSalience? (double)(*itr)->beatCount: 1.0);
         if (conf > best) {

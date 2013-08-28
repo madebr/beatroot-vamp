@@ -182,11 +182,6 @@ public:
      */
     void fillBeats(double start);
 
-    // for sorting AgentList
-    bool operator<(const Agent &a) const {
-        return beatInterval < a.beatInterval;
-    }
-
 }; // class Agent
 
 #endif
