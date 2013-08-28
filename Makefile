@@ -1,6 +1,6 @@
 
 #CXXFLAGS	:= -fPIC -g -DDEBUG_BEATROOT
-CXXFLAGS	:= -fPIC -O3
+CXXFLAGS	:= -fPIC -O3 -Wall
 
 OBJECTS	:= BeatRootProcessor.o BeatRootVampPlugin.o Peaks.o Agent.o AgentList.o Induction.o BeatTracker.o
 
