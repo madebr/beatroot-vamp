@@ -37,6 +37,14 @@ public:
 protected:
     Container list;
 
+    static bool agentComparator(const Agent *a, const Agent *b) {
+        if (a->beatInterval == b->beatInterval) {
+            return a->idNumber < b->idNumber; // ensure stable ordering
+        } else {
+            return a->beatInterval < b->beatInterval;
+        }
+    }
+
 public:
     // expose some vector methods
     //!!! can we remove these again once the rest of AgentList is implemented?
@@ -78,7 +86,21 @@ public:
 
     /** Sorts the AgentList by increasing beatInterval. */
     void sort() {
-	std::sort(list.begin(), list.end());
+#ifdef DEBUG_BEATROOT
+        std::cerr << "sort: before: ";
+        for (iterator i = list.begin(); i != list.end(); ++i) {
+            std::cerr << (*i)->idNumber << " ";
+        }
+        std::cerr << std::endl;
+#endif
+	std::sort(list.begin(), list.end(), agentComparator);
+#ifdef DEBUG_BEATROOT
+        std::cerr << "sort: after: ";
+        for (iterator i = list.begin(); i != list.end(); ++i) {
+            std::cerr << (*i)->idNumber << " ";
+        }
+        std::cerr << std::endl;
+#endif
     } // sort()
 
     /** Removes the given item from the list.
