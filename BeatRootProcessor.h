@@ -102,6 +102,7 @@ public:
     {
         hopSize = lrint(sampleRate * hopTime);
         fftSize = lrint(pow(2, lrint( log(fftTime * sampleRate) / log(2))));
+        init();
     } // constructor
 
     void reset() {
@@ -120,7 +121,7 @@ public:
     EventList beatTrack();
 
 protected:
-    /** Allocates memory for arrays, based on parameter settings */
+    /** Allocates or re-allocates memory for arrays, based on parameter settings */
     void init() {
 #ifdef DEBUG_BEATROOT
         std::cerr << "BeatRootProcessor::init()" << std::endl;
