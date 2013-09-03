@@ -68,7 +68,7 @@ public:
      *  @return A list of beat tracking agents, where each is initialised with one
      *          of the top tempo hypotheses but no beats
      */
-    static AgentList beatInduction(EventList events);
+    static AgentList beatInduction(AgentParameters params, EventList events);
 
 protected:
     /** For variable cluster widths in newInduction().

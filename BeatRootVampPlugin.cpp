@@ -24,7 +24,7 @@
 BeatRootVampPlugin::BeatRootVampPlugin(float inputSampleRate) :
     Plugin(inputSampleRate)
 {
-    m_processor = new BeatRootProcessor(inputSampleRate);
+    m_processor = new BeatRootProcessor(inputSampleRate, AgentParameters());
 }
 
 BeatRootVampPlugin::~BeatRootVampPlugin()
@@ -104,18 +104,113 @@ BeatRootVampPlugin::ParameterList
 BeatRootVampPlugin::getParameterDescriptors() const
 {
     ParameterList list;
+
+    ParameterDescriptor desc;
+
+    double postMarginFactor;
+
+    /** The maximum amount by which a beat can be earlier than the
+     *  predicted beat time, expressed as a fraction of the beat
+     *  period. */
+    double preMarginFactor;
+
+    /** The maximum allowed deviation from the initial tempo,
+     * expressed as a fraction of the initial beat period. */
+    double maxChange;
+
+    /** The default value of expiryTime, which is the time (in
+     *  seconds) after which an Agent that has no Event matching its
+     *  beat predictions will be destroyed. */
+    
+    desc.identifier = "preMarginFactor";
+    desc.name = "Pre-Margin Factor";
+    desc.description = "The maximum amount by which a beat can be earlier than the predicted beat time, expressed as a fraction of the beat period.";
+    desc.minValue = 0;
+    desc.maxValue = 1;
+    desc.defaultValue = AgentParameters::DEFAULT_PRE_MARGIN_FACTOR;
+    desc.isQuantized = false;
+    list.push_back(desc);
+    
+    desc.identifier = "postMarginFactor";
+    desc.name = "Post-Margin Factor";
+    desc.description = "The maximum amount by which a beat can be later than the predicted beat time, expressed as a fraction of the beat period.";
+    desc.minValue = 0;
+    desc.maxValue = 1;
+    desc.defaultValue = AgentParameters::DEFAULT_POST_MARGIN_FACTOR;
+    desc.isQuantized = false;
+    list.push_back(desc);
+    
+    desc.identifier = "maxChange";
+    desc.name = "Maximum Change";
+    desc.description = "The maximum allowed deviation from the initial tempo, expressed as a fraction of the initial beat period.";
+    desc.minValue = 0;
+    desc.maxValue = 1;
+    desc.defaultValue = AgentParameters::DEFAULT_MAX_CHANGE;
+    desc.isQuantized = false;
+    list.push_back(desc);
+    
+    desc.identifier = "expiryTime";
+    desc.name = "Expiry Time";
+    desc.description = "The default value of expiryTime, which is the time (in seconds) after which an Agent that has no Event matching its beat predictions will be destroyed.";
+    desc.minValue = 2;
+    desc.maxValue = 120;
+    desc.defaultValue = AgentParameters::DEFAULT_EXPIRY_TIME;
+    desc.isQuantized = false;
+    list.push_back(desc);
+
+    // Simon says...
+
+    // These are the parameters that should be exposed (Agent.cpp):
+
+    // If Pop, both margins should be lower (0.1).  If classical
+    // music, post margin can be increased
+    //
+    // double Agent::POST_MARGIN_FACTOR = 0.3;
+    // double Agent::PRE_MARGIN_FACTOR = 0.15;
+    //
+    // Max Change tells us how much tempo can change - so for
+    // classical we should make it higher
+    // 
+    // double Agent::MAX_CHANGE = 0.2;
+    // 
+    // The EXPIRY TIME default should be defaulted to 100 (usual cause
+    // of agents dying....)  it should also be exposed in order to
+    // troubleshoot eventual problems in songs with big silences in
+    // the beggining/end.
+    // 
+    // const double Agent::DEFAULT_EXPIRY_TIME = 10.0;
+
     return list;
 }
 
 float
 BeatRootVampPlugin::getParameter(string identifier) const
 {
+    if (identifier == "preMarginFactor") {
+        return m_parameters.preMarginFactor;
+    } else if (identifier == "postMarginFactor") {
+        return m_parameters.postMarginFactor;
+    } else if (identifier == "maxChange") {
+        return m_parameters.maxChange;
+    } else if (identifier == "expiryTime") {
+        return m_parameters.expiryTime;
+    }
+    
     return 0;
 }
 
 void
 BeatRootVampPlugin::setParameter(string identifier, float value) 
 {
+    if (identifier == "preMarginFactor") {
+        m_parameters.preMarginFactor = value;
+    } else if (identifier == "postMarginFactor") {
+        m_parameters.postMarginFactor = value;
+    } else if (identifier == "maxChange") {
+        m_parameters.maxChange = value;
+    } else if (identifier == "expiryTime") {
+        m_parameters.expiryTime = value;
+    }
 }
 
 BeatRootVampPlugin::ProgramList
@@ -187,7 +282,11 @@ BeatRootVampPlugin::initialise(size_t channels, size_t stepSize, size_t blockSiz
 	return false;
     }
 
-    m_processor->reset();
+    // Delete the processor that was created with default parameters
+    // and used to determine the expected step and block size; replace
+    // with one using the actual parameters we have
+    delete m_processor;
+    m_processor = new BeatRootProcessor(m_inputSampleRate, m_parameters);
 
     return true;
 }

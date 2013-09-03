@@ -75,7 +75,7 @@ void AgentList::removeDuplicates()
 } // removeDuplicates()
 
 
-void AgentList::beatTrack(EventList el, double stop)
+void AgentList::beatTrack(EventList el, AgentParameters params, double stop)
 {
     EventList::iterator ei = el.begin();
     bool phaseGiven = !empty() && ((*begin())->beatTime >= 0); // if given for one, assume given for others
@@ -102,7 +102,7 @@ void AgentList::beatTrack(EventList el, double stop)
                     std::cerr << "Creating a new agent" << std::endl;
 #endif
                     // Create new agent with different phase
-                    Agent *newAgent = new Agent(prevBeatInterval);
+                    Agent *newAgent = new Agent(params, prevBeatInterval);
                     // This may add another agent to our list as well
                     newAgent->considerAsBeat(ev, *this);
                     add(newAgent);

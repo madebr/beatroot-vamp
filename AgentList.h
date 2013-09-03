@@ -121,15 +121,15 @@ public:
     /** Perform beat tracking on a list of events (onsets).
      *  @param el The list of onsets (or events or peaks) to beat track
      */
-    void beatTrack(EventList el) {
-	beatTrack(el, -1.0);
+    void beatTrack(EventList el, AgentParameters params) {
+	beatTrack(el, params, -1.0);
     } // beatTrack()/1
 	
     /** Perform beat tracking on a list of events (onsets).
      *  @param el The list of onsets (or events or peaks) to beat track.
      *  @param stop Do not find beats after <code>stop</code> seconds.
      */
-    void beatTrack(EventList el, double stop);
+    void beatTrack(EventList el, AgentParameters params, double stop);
 
     /** Finds the Agent with the highest score in the list, or NULL if beat tracking has failed.
      *  @return The Agent with the highest score

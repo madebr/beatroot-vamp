@@ -81,6 +81,9 @@ protected:
 	
     /** The estimated onset times and their saliences. */	
     EventList onsetList;
+    
+    /** User-specifiable processing parameters. */
+    AgentParameters agentParameters;
 	
     /** Flag for suppressing all standard output messages except results. */
     static bool silent;
@@ -89,12 +92,14 @@ public:
 
     /** Constructor: note that streams are not opened until the input
      *  file is set (see <code>setInputFile()</code>). */
-    BeatRootProcessor(float sr) :
-        sampleRate(sr) {
-        hopSize = 0;
-        fftSize = 0;
-        hopTime = 0.010;
-        fftTime = 0.04644;
+    BeatRootProcessor(float sr, AgentParameters parameters) :
+        sampleRate(sr),
+        hopSize(0),
+        fftSize(0),
+        hopTime(0.010),
+        fftTime(0.04644),
+        agentParameters(parameters)
+    {
         hopSize = lrint(sampleRate * hopTime);
         fftSize = lrint(pow(2, lrint( log(fftTime * sampleRate) / log(2))));
     } // constructor

@@ -16,6 +16,8 @@
 #ifndef _BEATROOT_VAMP_PLUGIN_H_
 #define _BEATROOT_VAMP_PLUGIN_H_
 
+#include "Agent.h"
+
 #include <vamp-sdk/Plugin.h>
 
 using std::string;
@@ -61,6 +63,7 @@ public:
 
 protected:
     BeatRootProcessor *m_processor;
+    AgentParameters m_parameters;
 };
 
 

@@ -26,6 +26,40 @@
 
 class AgentList;
 
+class AgentParameters
+{
+public:
+    static const double DEFAULT_POST_MARGIN_FACTOR;
+    static const double DEFAULT_PRE_MARGIN_FACTOR;
+    static const double DEFAULT_MAX_CHANGE;
+    static const double DEFAULT_EXPIRY_TIME;
+
+    AgentParameters() :
+        postMarginFactor(DEFAULT_POST_MARGIN_FACTOR),
+        preMarginFactor(DEFAULT_PRE_MARGIN_FACTOR),
+        maxChange(DEFAULT_MAX_CHANGE),
+        expiryTime(DEFAULT_EXPIRY_TIME) { }
+
+    /** The maximum amount by which a beat can be later than the
+     *  predicted beat time, expressed as a fraction of the beat
+     *  period. */
+    double postMarginFactor;
+
+    /** The maximum amount by which a beat can be earlier than the
+     *  predicted beat time, expressed as a fraction of the beat
+     *  period. */
+    double preMarginFactor;
+
+    /** The maximum allowed deviation from the initial tempo,
+     * expressed as a fraction of the initial beat period. */
+    double maxChange;
+
+    /** The default value of expiryTime, which is the time (in
+     *  seconds) after which an Agent that has no Event matching its
+     *  beat predictions will be destroyed. */
+    double expiryTime;
+};
+
 /** Agent is the central class for beat tracking.
  *  Each Agent object has a tempo hypothesis, a history of tracked beats, and
  *  a score evaluating the continuity, regularity and salience of its beat track.
@@ -33,53 +67,47 @@ class AgentList;
 class Agent
 {
 public:
-    /** The maximum amount by which a beat can be later than the predicted beat time,
-     *  expressed as a fraction of the beat period. */
-    static double POST_MARGIN_FACTOR;
-
-    /** The maximum amount by which a beat can be earlier than the predicted beat time,
-     *  expressed as a fraction of the beat period. */
-    static double PRE_MARGIN_FACTOR;
-	
-    /** The default value of innerMargin, which is the maximum time (in seconds) that a
-     * 	beat can deviate from the predicted beat time without a fork occurring. */
+    /** The default value of innerMargin, which is the maximum time
+     * 	(in seconds) that a beat can deviate from the predicted beat
+     * 	time without a fork occurring. */
     static const double INNER_MARGIN;
 	
-    /** The maximum allowed deviation from the initial tempo, expressed as a fraction of the initial beat period. */
-    static double MAX_CHANGE;
-		
-    /** The slope of the penalty function for onsets which do not coincide precisely with predicted beat times. */
-    static double CONF_FACTOR;
+    /** The slope of the penalty function for onsets which do not
+     * coincide precisely with predicted beat times. */
+    static const double CONF_FACTOR;
 	
-    /** The reactiveness/inertia balance, i.e. degree of change in the tempo, is controlled by the correctionFactor
-     *  variable.  This constant defines its default value, which currently is not subsequently changed. The
-     *  beat period is updated by the reciprocal of the correctionFactor multiplied by the difference between the
-     *  predicted beat time and matching onset. */
+    /** The reactiveness/inertia balance, i.e. degree of change in the
+     *  tempo, is controlled by the correctionFactor variable.  This
+     *  constant defines its default value, which currently is not
+     *  subsequently changed. The beat period is updated by the
+     *  reciprocal of the correctionFactor multiplied by the
+     *  difference between the predicted beat time and matching
+     *  onset. */
     static const double DEFAULT_CORRECTION_FACTOR;
 	
-    /** The default value of expiryTime, which is the time (in seconds) after which an Agent that
-     *  has no Event matching its beat predictions will be destroyed. */
-    static const double DEFAULT_EXPIRY_TIME;
-
 protected:
     /** The identity number of the next created Agent */
     static int idCounter;
 	
-    /** The maximum time (in seconds) that a beat can deviate from the predicted beat time
-     *  without a fork occurring (i.e. a 2nd Agent being created). */
-    static double innerMargin;
+    /** The maximum time (in seconds) that a beat can deviate from the
+     *  predicted beat time without a fork occurring (i.e. a 2nd Agent
+     *  being created). */
+    double innerMargin;
 
-    /** Controls the reactiveness/inertia balance, i.e. degree of change in the tempo.  The
-     *  beat period is updated by the reciprocal of the correctionFactor multiplied by the difference between the
-     *  predicted beat time and matching onset. */
-    static double correctionFactor;
+    /** Controls the reactiveness/inertia balance, i.e. degree of
+     *  change in the tempo.  The beat period is updated by the
+     *  reciprocal of the correctionFactor multiplied by the
+     *  difference between the predicted beat time and matching
+     *  onset. */
+    double correctionFactor;
 
-    /** The time (in seconds) after which an Agent that
-     *  has no Event matching its beat predictions will be destroyed. */
-    static double expiryTime;
+    /** The time (in seconds) after which an Agent that has no Event
+     *  matching its beat predictions will be destroyed. */
+    double expiryTime;
 	
-    /** For scoring Agents in a (non-existent) real-time version (otherwise not used). */
-    static double decayFactor;
+    /** For scoring Agents in a (non-existent) real-time version
+     * (otherwise not used). */
+    double decayFactor;
 
 public:
     /** The size of the outer half-window before the predicted beat time. */
@@ -94,46 +122,57 @@ public:
     /** To be used in real-time version?? */
     double tempoScore;
 	
-    /** Sum of salience values of the Events which have been interpreted
-     *  as beats by this Agent, weighted by their nearness to the predicted beat times. */
+    /** Sum of salience values of the Events which have been
+     *  interpreted as beats by this Agent, weighted by their nearness
+     *  to the predicted beat times. */
     double phaseScore;
 	
-    /** How long has this agent been the best?  For real-time version; otherwise not used. */
+    /** How long has this agent been the best?  For real-time version;
+     * otherwise not used. */
     double topScoreTime;
 	
-    /** The number of beats found by this Agent, including interpolated beats. */
+    /** The number of beats found by this Agent, including
+     * interpolated beats. */
     int beatCount;
 	
-    /** The current tempo hypothesis of the Agent, expressed as the beat period in seconds. */
+    /** The current tempo hypothesis of the Agent, expressed as the
+     * beat period in seconds. */
     double beatInterval;
 
-    /** The initial tempo hypothesis of the Agent, expressed as the beat period in seconds. */
+    /** The initial tempo hypothesis of the Agent, expressed as the
+     * beat period in seconds. */
     double initialBeatInterval;
 	
     /** The time of the most recent beat accepted by this Agent. */
     double beatTime;
+
+    /** The maximum allowed deviation from the initial tempo,
+     * expressed as a fraction of the initial beat period. */
+    double maxChange;
 	
-    /** The list of Events (onsets) accepted by this Agent as beats, plus interpolated beats. */
+    /** The list of Events (onsets) accepted by this Agent as beats,
+     * plus interpolated beats. */
     EventList events;
 
     /** Constructor: the work is performed by init()
      *  @param ibi The beat period (inter-beat interval) of the Agent's tempo hypothesis.
      */
-    Agent(double ibi) {
-	innerMargin = INNER_MARGIN;
-	correctionFactor = DEFAULT_CORRECTION_FACTOR;
-	expiryTime = DEFAULT_EXPIRY_TIME;
-	decayFactor = 0;
-	beatInterval = ibi;
-	initialBeatInterval = ibi;
-	postMargin = ibi * POST_MARGIN_FACTOR;
-	preMargin = ibi * PRE_MARGIN_FACTOR;
-	idNumber = idCounter++;
-	phaseScore = 0.0;
-	tempoScore = 0.0;
-	topScoreTime = 0.0;
-	beatCount = 0;
-	beatTime = -1.0;
+    Agent(AgentParameters params, double ibi) :
+	innerMargin(INNER_MARGIN),
+	correctionFactor(DEFAULT_CORRECTION_FACTOR),
+	expiryTime(params.expiryTime),
+	decayFactor(0),
+	preMargin(ibi * params.preMarginFactor),
+	postMargin(ibi * params.postMarginFactor),
+	idNumber(idCounter++),
+	tempoScore(0.0),
+	phaseScore(0.0),
+	topScoreTime(0.0),
+	beatCount(0),
+	beatInterval(ibi),
+	initialBeatInterval(ibi),
+	beatTime(-1.0),
+        maxChange(params.maxChange) {
     } // constructor
 
     Agent *clone() const {

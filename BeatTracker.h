@@ -56,8 +56,8 @@ public:
      *  @param events The onsets or peaks in a feature list
      *  @return The list of beats, or an empty list if beat tracking fails
      */
-    static EventList beatTrack(EventList events) {
-	return beatTrack(events, EventList());
+    static EventList beatTrack(AgentParameters params, EventList events) {
+	return beatTrack(params, events, EventList());
     }
 	
     /** Perform beat tracking.
@@ -65,7 +65,8 @@ public:
      *  @param beats The initial beats which are given, if any
      *  @return The list of beats, or an empty list if beat tracking fails
      */
-    static EventList beatTrack(EventList events, EventList beats);
+    static EventList beatTrack(AgentParameters params,
+                               EventList events, EventList beats);
 	
 	
     // Various get and set methods

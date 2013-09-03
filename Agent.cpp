@@ -16,26 +16,22 @@
 #include "Agent.h"
 #include "BeatTracker.h"
 
-double Agent::POST_MARGIN_FACTOR = 0.3;
-double Agent::PRE_MARGIN_FACTOR = 0.15;
+const double AgentParameters::DEFAULT_POST_MARGIN_FACTOR = 0.3;
+const double AgentParameters::DEFAULT_PRE_MARGIN_FACTOR = 0.15;
+const double AgentParameters::DEFAULT_MAX_CHANGE = 0.2;
+const double AgentParameters::DEFAULT_EXPIRY_TIME = 10.0;
+
 const double Agent::INNER_MARGIN = 0.040;
-double Agent::MAX_CHANGE = 0.2;
-double Agent::CONF_FACTOR = 0.5;
+const double Agent::CONF_FACTOR = 0.5;
 const double Agent::DEFAULT_CORRECTION_FACTOR = 50.0;
-const double Agent::DEFAULT_EXPIRY_TIME = 10.0;
 
 int Agent::idCounter = 0;
-
-double Agent::innerMargin = 0.0;
-double Agent::correctionFactor = 0.0;
-double Agent::expiryTime = 0.0;
-double Agent::decayFactor = 0.0;
 
 void Agent::accept(Event e, double err, int beats) {
     beatTime = e.time;
     events.push_back(e);
     if (fabs(initialBeatInterval - beatInterval -
-             err / correctionFactor) < MAX_CHANGE * initialBeatInterval)
+             err / correctionFactor) < maxChange * initialBeatInterval)
         beatInterval += err / correctionFactor;// Adjust tempo
     beatCount += beats;
     double conFactor = 1.0 - CONF_FACTOR * err /

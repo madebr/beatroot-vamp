@@ -23,7 +23,7 @@ double Induction::maxIBI = 1.0;
 int Induction::topN = 10;
 
 
-AgentList Induction::beatInduction(EventList events) {
+AgentList Induction::beatInduction(AgentParameters params, EventList events) {
     int i, j, b, bestCount;
     bool submult;
     int intervals = 0;			// number of interval clusters
@@ -183,7 +183,7 @@ AgentList Induction::beatInduction(EventList events) {
         while (beat > maxIBI)		// Minimum speed
             beat /= 2.0;
         if (beat >= minIBI) {
-            a.push_back(new Agent(beat));
+            a.push_back(new Agent(params, beat));
         }
     }
 #ifdef DEBUG_BEATROOT

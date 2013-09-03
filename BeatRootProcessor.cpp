@@ -67,7 +67,7 @@ EventList BeatRootProcessor::beatTrack() {
     std::cerr << "Onsets: " << onsetList.size() << std::endl;
 #endif
 
-    return BeatTracker::beatTrack(onsetList);
+    return BeatTracker::beatTrack(agentParameters, onsetList);
 
 } // processFile()
 

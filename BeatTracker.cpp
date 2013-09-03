@@ -15,7 +15,8 @@
 
 #include "BeatTracker.h"
 
-EventList BeatTracker::beatTrack(EventList events, EventList beats)
+EventList BeatTracker::beatTrack(AgentParameters params,
+                                 EventList events, EventList beats)
 {
     AgentList agents;
     int count = 0;
@@ -28,9 +29,9 @@ EventList BeatTracker::beatTrack(EventList events, EventList beats)
     }
     if (count > 0) { // tempo given by mean of initial beats
 	double ioi = (beatTime - beats.begin()->time) / count;
-	agents.push_back(new Agent(ioi));
+	agents.push_back(new Agent(params, ioi));
     } else // tempo not given; use tempo induction
-	agents = Induction::beatInduction(events);
+	agents = Induction::beatInduction(params, events);
     if (!beats.empty())
 	for (AgentList::iterator itr = agents.begin(); itr != agents.end();
 	     ++itr) {
@@ -38,7 +39,7 @@ EventList BeatTracker::beatTrack(EventList events, EventList beats)
 	    (*itr)->beatCount = count;
 	    (*itr)->events = beats;
 	}
-    agents.beatTrack(events, -1);
+    agents.beatTrack(events, params, -1);
     Agent *best = agents.bestAgent();
     EventList results;
     if (best) {
