@@ -4,9 +4,11 @@ BeatRoot Vamp Plugin
 
 A Vamp Plugin implementation of the BeatRoot beat tracking system.
 
-Chris Cannam and Simon Dixon, Centre for Digital Music
+Simon Dixon, Centre for Digital Music
 School of Electronic Engineering and Computer Science
 Queen Mary, University of London
+
+Plugin by Chris Cannam, Centre for Digital Music
 
 ***
 
