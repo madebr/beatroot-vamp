@@ -1,0 +1,21 @@
+
+BeatRoot Vamp Plugin
+====================
+
+A Vamp Plugin implementation of the BeatRoot beat tracking system.
+
+Chris Cannam and Simon Dixon, Centre for Digital Music
+School of Electronic Engineering and Computer Science
+Queen Mary, University of London
+
+***
+
+More information about BeatRoot:
+http://www.eecs.qmul.ac.uk/~simond/beatroot/
+
+More information about Vamp Plugins:
+http://vamp-plugins.org/
+
+Code project for the BeatRoot Vamp Plugin:
+https://code.soundsoftware.ac.uk/projects/beatroot-vamp
+

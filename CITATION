@@ -1,0 +1,15 @@
+@article{simon2001a,
+  author = {Simon Dixon},
+  title = {Automatic Extraction of Tempo and Beat from Expressive Performances},
+  journal = {Journal of New Music Research},
+  number = {1},
+  pages = {39-58},
+  volume = {30},
+  year = {2001}
+} 
+@misc{chris2013a,
+  author = {Chris Cannam and Matthias Mauch and Matthew E. P. Davies and Dixon, Simon and Christian Landone and Katy C. Noland and Mark Levy and Massimiliano Zanoni and Dan Stowell and Luís A. Figueira},
+  title = {MIREX 2013 Entry: Vamp Plugins from the Centre for Digital Music},
+  year = {2013}
+} 
+
