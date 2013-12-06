@@ -64,6 +64,8 @@ public:
 protected:
     BeatRootProcessor *m_processor;
     AgentParameters m_parameters;
+    Vamp::RealTime m_origin;
+    bool m_firstFrame;
 };
 
 

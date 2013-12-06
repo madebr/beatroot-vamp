@@ -22,7 +22,8 @@
 #include <vamp-sdk/PluginAdapter.h>
 
 BeatRootVampPlugin::BeatRootVampPlugin(float inputSampleRate) :
-    Plugin(inputSampleRate)
+    Plugin(inputSampleRate),
+    m_firstFrame(true)
 {
     m_processor = new BeatRootProcessor(inputSampleRate, AgentParameters());
 }
@@ -107,21 +108,6 @@ BeatRootVampPlugin::getParameterDescriptors() const
 
     ParameterDescriptor desc;
 
-    double postMarginFactor;
-
-    /** The maximum amount by which a beat can be earlier than the
-     *  predicted beat time, expressed as a fraction of the beat
-     *  period. */
-    double preMarginFactor;
-
-    /** The maximum allowed deviation from the initial tempo,
-     * expressed as a fraction of the initial beat period. */
-    double maxChange;
-
-    /** The default value of expiryTime, which is the time (in
-     *  seconds) after which an Agent that has no Event matching its
-     *  beat predictions will be destroyed. */
-    
     desc.identifier = "preMarginFactor";
     desc.name = "Pre-Margin Factor";
     desc.description = "The maximum amount by which a beat can be earlier than the predicted beat time, expressed as a fraction of the beat period.";
@@ -295,11 +281,18 @@ void
 BeatRootVampPlugin::reset()
 {
     m_processor->reset();
+    m_firstFrame = true;
+    m_origin = Vamp::RealTime::zeroTime;
 }
 
 BeatRootVampPlugin::FeatureSet
 BeatRootVampPlugin::process(const float *const *inputBuffers, Vamp::RealTime timestamp)
 {
+    if (m_firstFrame) {
+        m_origin = timestamp;
+        m_firstFrame = false;
+    }
+
     m_processor->processFrame(inputBuffers);
     return FeatureSet();
 }
@@ -318,7 +311,7 @@ BeatRootVampPlugin::getRemainingFeatures()
     FeatureSet fs;
 
     for (EventList::const_iterator i = el.begin(); i != el.end(); ++i) {
-        f.timestamp = Vamp::RealTime::fromSeconds(i->time);
+        f.timestamp = m_origin + Vamp::RealTime::fromSeconds(i->time);
         fs[0].push_back(f);
     }
 

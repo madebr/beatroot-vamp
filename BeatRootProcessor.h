@@ -94,10 +94,10 @@ public:
      *  file is set (see <code>setInputFile()</code>). */
     BeatRootProcessor(float sr, AgentParameters parameters) :
         sampleRate(sr),
-        hopSize(0),
-        fftSize(0),
         hopTime(0.010),
         fftTime(0.04644),
+        hopSize(0),
+        fftSize(0),
         agentParameters(parameters)
     {
         hopSize = lrint(sampleRate * hopTime);
