@@ -1,9 +1,11 @@
 
-CFLAGS := -fPIC -O3 -Wall
-CXXFLAGS := $(CFLAGS)
+CFLAGS := -fPIC -O3 -Wall -mmacosx-version-min=10.7 -arch x86_64 -arch i386
+CXXFLAGS := -I../vamp-plugin-sdk $(CFLAGS)
 
-PLUGIN_LDFLAGS := -dynamiclib -lvamp-sdk -exported_symbols_list vamp-plugin.list
+PLUGIN_LDFLAGS := -mmacosx-version-min=10.7 -arch x86_64 -arch i386 -dynamiclib -L../vamp-plugin-sdk -lvamp-sdk -exported_symbols_list vamp-plugin.list
 
 PLUGIN_EXT := .dylib
 
 include Makefile.inc
+
+

@@ -7,7 +7,7 @@ CC	?= gcc
 CFLAGS := $(CFLAGS) 
 CXXFLAGS := -I. $(CXXFLAGS)
 
-PLUGIN := beatroot-vamp(PLUGIN_EXT)
+PLUGIN := beatroot-vamp$(PLUGIN_EXT)
 
 PLUGIN_LDFLAGS := $(LDFLAGS) $(PLUGIN_LDFLAGS)
 
@@ -16,7 +16,7 @@ OBJECTS	:= BeatRootProcessor.o BeatRootVampPlugin.o Peaks.o Agent.o AgentList.o 
 HEADERS := Agent.h AgentList.h BeatRootProcessor.h BeatRootVampPlugin.h BeatTracker.h Event.h Induction.h Peaks.h
 
 $(PLUGIN):	$(OBJECTS) $(HEADERS)
-	$(CXX) -o $@ $^ $(PLUGIN_LDFLAGS)
+	$(CXX) -o $@ $(OBJECTS) $(PLUGIN_LDFLAGS)
 
 clean:	
 	rm *.o
