@@ -1,0 +1,9 @@
+
+CFLAGS := -fPIC -O3 -Wall
+CXXFLAGS := $(CFLAGS)
+
+PLUGIN_LDFLAGS := -dynamiclib -lvamp-sdk -exported_symbols_list vamp-plugin.list
+
+PLUGIN_EXT := .dylib
+
+include Makefile.inc

@@ -1,13 +1,22 @@
 
-#CXXFLAGS	:= -fPIC -g -DDEBUG_BEATROOT
-CXXFLAGS	:= -fPIC -O3 -Wall
+PLUGIN_EXT	?= .so
+
+CXX	?= g++
+CC	?= gcc
+
+CFLAGS := $(CFLAGS) 
+CXXFLAGS := -I. $(CXXFLAGS)
+
+PLUGIN := beatroot-vamp(PLUGIN_EXT)
+
+PLUGIN_LDFLAGS := $(LDFLAGS) $(PLUGIN_LDFLAGS)
 
 OBJECTS	:= BeatRootProcessor.o BeatRootVampPlugin.o Peaks.o Agent.o AgentList.o Induction.o BeatTracker.o
 
 HEADERS := Agent.h AgentList.h BeatRootProcessor.h BeatRootVampPlugin.h BeatTracker.h Event.h Induction.h Peaks.h
 
-beatroot-vamp.so:	$(OBJECTS) $(HEADERS)
-	g++ -g -shared $(OBJECTS) -o $@ -Wl,-Bstatic -lvamp-sdk -Wl,-Bdynamic -lpthread -Wl,--version-script=vamp-plugin.map
+$(PLUGIN):	$(OBJECTS) $(HEADERS)
+	$(CXX) -o $@ $^ $(PLUGIN_LDFLAGS)
 
 clean:	
 	rm *.o
