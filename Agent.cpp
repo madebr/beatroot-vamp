@@ -52,7 +52,6 @@ void Agent::accept(Event e, double err, int beats) {
 } // accept()
 
 bool Agent::considerAsBeat(Event e, AgentList &a) {
-    double err;
     if (beatTime < 0) {	// first event
 #ifdef DEBUG_BEATROOT
         std::cerr << "Ag#" << idNumber << ": accepting first event trivially at " << e.time << std::endl;
@@ -72,7 +71,7 @@ bool Agent::considerAsBeat(Event e, AgentList &a) {
 	    return false;
 	}
 	double beats = nearbyint((e.time - beatTime) / beatInterval);
-	err = e.time - beatTime - beats * beatInterval;
+	double err = e.time - beatTime - beats * beatInterval;
 #ifdef DEBUG_BEATROOT
         std::cerr << "Ag#" << idNumber << ": time " << e.time << ", err " << err << " for beats " << beats << std::endl;
 #endif
