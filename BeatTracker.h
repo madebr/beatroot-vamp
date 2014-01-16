@@ -54,19 +54,25 @@ public:
 
     /** Perform beat tracking.
      *  @param events The onsets or peaks in a feature list
+     *  @param unfilledReturn Pointer to list in which to return 
+     *     un-interpolated beats, or NULL
      *  @return The list of beats, or an empty list if beat tracking fails
      */
-    static EventList beatTrack(AgentParameters params, EventList events) {
-	return beatTrack(params, events, EventList());
+    static EventList beatTrack(AgentParameters params, EventList events,
+                               EventList *unfilledReturn) {
+	return beatTrack(params, events, EventList(), unfilledReturn);
     }
 	
     /** Perform beat tracking.
      *  @param events The onsets or peaks in a feature list
      *  @param beats The initial beats which are given, if any
+     *  @param unfilledReturn Pointer to list in which to return
+     *     un-interpolated beats, or NULL
      *  @return The list of beats, or an empty list if beat tracking fails
      */
     static EventList beatTrack(AgentParameters params,
-                               EventList events, EventList beats);
+                               EventList events, EventList beats,
+                               EventList *unfilledReturn);
 	
 	
     // Various get and set methods

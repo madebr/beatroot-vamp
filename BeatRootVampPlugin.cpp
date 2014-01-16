@@ -239,6 +239,11 @@ BeatRootVampPlugin::getOutputDescriptors() const
     d.hasDuration = false;
     list.push_back(d);
 
+    d.identifier = "unfilled";
+    d.name = "Un-interpolated beats";
+    d.description = "Locations of detected beats, before agent interpolation occurs";
+    list.push_back(d);
+
     return list;
 }
 
@@ -300,7 +305,8 @@ BeatRootVampPlugin::process(const float *const *inputBuffers, Vamp::RealTime tim
 BeatRootVampPlugin::FeatureSet
 BeatRootVampPlugin::getRemainingFeatures()
 {
-    EventList el = m_processor->beatTrack();
+    EventList unfilled;
+    EventList el = m_processor->beatTrack(&unfilled);
 
     Feature f;
     f.hasTimestamp = true;
@@ -313,6 +319,12 @@ BeatRootVampPlugin::getRemainingFeatures()
     for (EventList::const_iterator i = el.begin(); i != el.end(); ++i) {
         f.timestamp = m_origin + Vamp::RealTime::fromSeconds(i->time);
         fs[0].push_back(f);
+    }
+
+    for (EventList::const_iterator i = unfilled.begin(); 
+         i != unfilled.end(); ++i) {
+        f.timestamp = m_origin + Vamp::RealTime::fromSeconds(i->time);
+        fs[1].push_back(f);
     }
 
     return fs;

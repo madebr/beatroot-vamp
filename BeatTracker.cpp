@@ -16,7 +16,8 @@
 #include "BeatTracker.h"
 
 EventList BeatTracker::beatTrack(AgentParameters params,
-                                 EventList events, EventList beats)
+                                 EventList events, EventList beats,
+                                 EventList *unfilledReturn)
 {
     AgentList agents;
     int count = 0;
@@ -43,6 +44,7 @@ EventList BeatTracker::beatTrack(AgentParameters params,
     Agent *best = agents.bestAgent();
     EventList results;
     if (best) {
+        if (unfilledReturn) *unfilledReturn = best->events;
 	best->fillBeats(beatTime);
 	results = best->events;
     }

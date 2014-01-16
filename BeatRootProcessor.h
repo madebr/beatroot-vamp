@@ -118,7 +118,7 @@ public:
 
     /** Tracks beats once all frames have been processed by processFrame
      */
-    EventList beatTrack();
+    EventList beatTrack(EventList *optionalUnfilledBeatReturn);
 
 protected:
     /** Allocates or re-allocates memory for arrays, based on parameter settings */

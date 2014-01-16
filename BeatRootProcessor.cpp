@@ -31,7 +31,7 @@ void BeatRootProcessor::processFrame(const float *const *inputBuffers) {
     
 } // processFrame()
 
-EventList BeatRootProcessor::beatTrack() {
+EventList BeatRootProcessor::beatTrack(EventList *unfilledReturn) {
 
 #ifdef DEBUG_BEATROOT
     std::cerr << "Spectral flux:" << std::endl;
@@ -67,7 +67,7 @@ EventList BeatRootProcessor::beatTrack() {
     std::cerr << "Onsets: " << onsetList.size() << std::endl;
 #endif
 
-    return BeatTracker::beatTrack(agentParameters, onsetList);
+    return BeatTracker::beatTrack(agentParameters, onsetList, unfilledReturn);
 
 } // processFile()
 
