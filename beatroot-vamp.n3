@@ -13,17 +13,25 @@
     foaf:maker          <http://www.vamp-plugins.org/doap.rdf#template-generator> ;
     foaf:primaryTopic   <http://vamp-plugins.org/rdf/plugins/beatroot-vamp> .
 
-:beatroot-vamp a  vamp:PluginLibrary ;
+:maker
+    foaf:name "Simon Dixon and Chris Cannam" ;
+    foaf:logo <http://vamp-plugins.org/rdf/plugins/makers/qm.png> ;
+    foaf:page <http://c4dm.eecs.qmul.ac.uk/> .
+
+plugbase:library a  vamp:PluginLibrary ;
     vamp:identifier "beatroot-vamp"  ; 
     vamp:available_plugin plugbase:beatroot ; 
     foaf:page <http://code.soundsoftware.ac.uk/projects/beatroot-vamp> ;
+    foaf:maker :maker ;
+    dc:title "BeatRoot" ;
+    dc:description "A plugin implementation of the BeatRoot beat tracking system" ;
     .
 
 plugbase:beatroot a   vamp:Plugin ;
     dc:title              "BeatRoot Beat Tracker" ;
     vamp:name             "BeatRoot Beat Tracker" ;
     dc:description        """Identify beat locations in music""" ;
-    foaf:maker            [ foaf:name "Simon Dixon (plugin by Chris Cannam)" ] ; # FIXME could give plugin author's URI here
+    foaf:maker            :maker ;
     dc:rights             """GPL""" ;
 #   cc:license            <Place plugin license URI here and uncomment> ; 
     vamp:identifier       "beatroot" ;
