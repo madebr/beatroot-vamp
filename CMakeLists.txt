@@ -44,11 +44,18 @@ target_include_directories(beatroot PUBLIC
 set_target_properties(beatroot
     PROPERTIES
         EXPORT_NAME ${beatroot_export_name}
+        WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 if(MSVC AND NOT BUILD_SHARED_LIBS)
     set_target_properties(beatroot
         PROPERTIES
             OUTPUT_NAME beatroot-static
+    )
+endif()
+if(WIN32 AND BUILD_SHARED_LIBS)
+    set_target_properties(beatroot
+        PROPERTIES
+            PREFIX ""
     )
 endif()
 
@@ -59,8 +66,8 @@ configure_package_config_file(beatroot-config.cmake.in beatroot-config.cmake
 )
 
 install(TARGETS beatroot EXPORT beatrootExports
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 install(FILES ${BEATROOT_HEADERS}
@@ -74,9 +81,6 @@ install(EXPORT beatrootExports
     DESTINATION "${BEATROOT_INSTALL_CMAKEDIR}"
     FILE "beatroot-${beatroot_shared_static}-targets.cmake"
 )
-
-if(BUILD_SHARED_LIBS)
-endif()
 
 if(BUILD_VAMP_PLUGIN)
     find_package(vamp-sdk REQUIRED)
@@ -104,10 +108,16 @@ if(BUILD_VAMP_PLUGIN)
                 -fno-exceptions
         )
     endif()
+    if(WIN32 AND BUILD_SHARED_LIBS)
+        set_target_properties(beatroot-vamp
+            PROPERTIES
+            PREFIX ""
+        )
+    endif()
 
     install(TARGETS beatroot-vamp
-        ARCHIVE DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        LIBRARY DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     )
     install(FILES ${BEATROOT_VAMP_HEADERS}
