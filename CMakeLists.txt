@@ -5,8 +5,10 @@ include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-cmake_dependent_option(BUILD_VAMP_PLUGIN "Build vamp plugin" OFF "NOT BUILD_SHARED_LIBS" OFF)
+cmake_dependent_option(BUILD_VAMP_PLUGIN "Build vamp plugin" ON "NOT BUILD_SHARED_LIBS" OFF)
 
 if(BUILD_SHARED_LIBS)
     set(beatroot_export_name "beatroot")
@@ -96,7 +98,7 @@ if(BUILD_VAMP_PLUGIN)
     if(MINGW)
         target_link_options(beatroot_vamp
             PRIVATE
-                -Wl,-static-libgcc
+                -Wl,--static-libgcc
                 "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/vamp-plugin.map"
                 -fno-exceptions
         )
