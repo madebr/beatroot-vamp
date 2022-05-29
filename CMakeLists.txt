@@ -35,6 +35,10 @@ add_library(beatroot
     ${BEATROOT_HEADERS}
 )
 add_library(beatroot::${beatroot_export_name} ALIAS beatroot)
+target_include_directories(beatroot PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/beatroot>"
+)
 set_target_properties(beatroot
     PROPERTIES
         EXPORT_NAME ${beatroot_export_name}
