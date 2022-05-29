@@ -84,19 +84,19 @@ if(BUILD_VAMP_PLUGIN)
     set(BEATROOT_VAMP_HEADERS
         BeatRootVampPlugin.h
     )
-    add_library(beatroot_vamp SHARED
+    add_library(beatroot-vamp SHARED
         BeatRootVampPlugin.cpp
         ${BEATROOT_VAMP_HEADERS}
     )
-    target_link_libraries(beatroot_vamp PRIVATE vamp-sdk::vamp-sdk)
+    target_link_libraries(beatroot-vamp PRIVATE vamp-sdk::vamp-sdk)
     if(APPLE)
-        target_link_options(beatroot_vamp
+        target_link_options(beatroot-vamp
             PRIVATE
                 -exported_symbols_list "${CMAKE_CURRENT_SOURCE_DIR}/vamp-plugin.list"
         )
     endif()
     if(MINGW)
-        target_link_options(beatroot_vamp
+        target_link_options(beatroot-vamp
             PRIVATE
                 -Wl,--static-libgcc
                 "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/vamp-plugin.map"
@@ -104,7 +104,7 @@ if(BUILD_VAMP_PLUGIN)
         )
     endif()
 
-    install(TARGETS beatroot_vamp
+    install(TARGETS beatroot-vamp
         ARCHIVE DESTINATION "${CMAKE_INSTALL_BINDIR}"
         LIBRARY DESTINATION "${CMAKE_INSTALL_BINDIR}"
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
