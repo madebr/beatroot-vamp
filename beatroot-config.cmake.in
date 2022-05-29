@@ -1,0 +1,7 @@
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/beatroot-shared-targets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/beatroot-shared-targets.cmake")
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/beatroot-static-targets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/beatroot-static-targets.cmake")
+endif()
