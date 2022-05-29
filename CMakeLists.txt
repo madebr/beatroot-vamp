@@ -98,7 +98,8 @@ if(BUILD_VAMP_PLUGIN)
     if(MINGW)
         target_link_options(beatroot-vamp
             PRIVATE
-                -Wl,--static-libgcc
+                -static-libgcc
+                -static-libstdc++
                 "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/vamp-plugin.map"
                 -fno-exceptions
         )
